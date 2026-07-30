@@ -397,6 +397,7 @@ export const PRODUCTS = [
 
   // $45.00-$45.90
   { id: 'berberine', type: 'supplement', category: 'supplement', name: 'Berberine+ & Pierde Peso', price: 45.00, allowedStates: 'ALL', usage: 'How to use: 2 times a day' },
+  { id: 'glp1_support', type: 'supplement', category: 'supplement', name: 'GLP-1 Support | Daily Metabolic, Gut & Micronutrient Formula', price: 45.00, allowedStates: 'ALL' },
   { id: 'colon_cleanse', type: 'supplement', category: 'supplement', name: 'Colon Gentle Cleanse', price: 33.90, allowedStates: 'ALL' },
   { id: 'colostrum', type: 'supplement', category: 'supplement', name: 'Colostrum Capsules', price: 33.90, allowedStates: 'ALL' },
   { id: 'creatine', type: 'supplement', category: 'supplement', name: 'Creatine Monohydrate', price: 33.90, allowedStates: 'ALL' },
