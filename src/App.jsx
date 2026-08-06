@@ -97,7 +97,7 @@ function Dashboard({ session }) {
                 })
                 .then(({ prices = {} }) => {
                   setCatalogProducts(PRODUCTS.map(product =>
-                    Object.prototype.hasOwnProperty.call(prices, product.id)
+                    product.type !== 'glp' && Object.prototype.hasOwnProperty.call(prices, product.id)
                       ? { ...product, price: prices[product.id] }
                       : product
                   ));
