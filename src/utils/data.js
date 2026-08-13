@@ -314,19 +314,19 @@ export const PRODUCTS = [
   // ============================================================
   // SEMAGLUTIDE (GLP-1, state + BMI restricted)
   // ============================================================
-  { id: 'sema1', type: 'glp', category: 'medicine', name: 'Semaglutide 1mg', price: 499.00, allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
-  { id: 'sema3', type: 'glp', category: 'medicine', name: 'Semaglutide 3mg', price: 699.00, allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
-  { id: 'sema7', type: 'glp', category: 'medicine', name: 'Semaglutide 7mg', price: 799.00, allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
-  { id: 'sema10', type: 'glp', category: 'medicine', name: 'Semaglutide 10mg', price: 799.00, allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
-  { id: 'sema_micro', type: 'glp', category: 'medicine', name: 'Semaglutide Microdose', price: 499.00, allowedStates: SEMAGLUTIDE_STATES, requirement: 'MICRODOSE' },
+  { id: 'sema1', type: 'glp', category: 'medicine', name: 'Semaglutide 1mg', price: 589.00, allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'sema3', type: 'glp', category: 'medicine', name: 'Semaglutide 3mg', price: 789.00, allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'sema7', type: 'glp', category: 'medicine', name: 'Semaglutide 7mg', price: 889.00, allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'sema10', type: 'glp', category: 'medicine', name: 'Semaglutide 10mg', price: 889.00, allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'sema_micro', type: 'glp', category: 'medicine', name: 'Semaglutide Microdose', price: 489.00, allowedStates: SEMAGLUTIDE_STATES, requirement: 'MICRODOSE' },
 
   // ============================================================
   // TIRZEPATIDE (GLP-1, state + BMI restricted)
   // ============================================================
-  { id: 'tirz8', type: 'glp', category: 'medicine', name: 'Tirzepatide 8mg', price: 599.00, allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
-  { id: 'tirz24', type: 'glp', category: 'medicine', name: 'Tirzepatide 24mg', price: 799.00, allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
-  { id: 'tirz52', type: 'glp', category: 'medicine', name: 'Tirzepatide 52mg', price: 999.00, allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
-  { id: 'tirz60', type: 'glp', category: 'medicine', name: 'Tirzepatide 60mg', price: 999.00, allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'tirz8', type: 'glp', category: 'medicine', name: 'Tirzepatide 8mg', price: 699.00, allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'tirz24', type: 'glp', category: 'medicine', name: 'Tirzepatide 24mg', price: 899.00, allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'tirz52', type: 'glp', category: 'medicine', name: 'Tirzepatide 52mg', price: 1299.00, allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'tirz60', type: 'glp', category: 'medicine', name: 'Tirzepatide 60mg', price: 1299.00, allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
   { id: 'tirz_micro', type: 'glp', category: 'medicine', name: 'Tirzepatide Microdose', price: 599.00, allowedStates: TIRZEPATIDE_STATES, requirement: 'MICRODOSE' },
 
   // ============================================================
