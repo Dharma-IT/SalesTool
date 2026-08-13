@@ -35,7 +35,8 @@ const GLP1_STATES = 'AZ, CA, CO, CT, DE, FL, GA, HI, IL, IA, MA, ME, MD, MI, MO,
 const SEMAGLUTIDE_STATES = 'AZ, CA, CO, CT, DE, FL, GA, HI, IL, IA, MA, ME, MD, MI, MO, MT, NE, NV, NH, NJ, NM, NY, NC, ND, OH, OK, OR, PA, RI, SD, TN, TX, UT, VT, VA, WA, WI, WY, IN, MN, SC';
 
 const GLP1_NO_TIRZ = 'AZ, CO, CT, DE, FL, GA, HI, IL, IA, MA, ME, MD, MI, MO, MT, NE, NV, NH, NJ, NM, NY, NC, ND, OH, OK, OR, PA, RI, SD, TN, TX, UT, VT, VA, WA, WI, WY';
-const TIRZEPATIDE_STATES = 'AZ, CA, CO, CT, DE, FL, GA, HI, IL, IA, MA, ME, MD, MI, MO, MT, NE, NV, NH, NJ, NM, NY, NC, ND, OH, OK, OR, PA, RI, SD, TN, TX, UT, VT, VA, WA, WI, WY';
+// Tirzepatide is also available in Indiana, Minnesota, and South Carolina.
+const TIRZEPATIDE_STATES = 'AZ, CA, CO, CT, DE, FL, GA, HI, IL, IA, MA, ME, MD, MI, MO, MT, NE, NV, NH, NJ, NM, NY, NC, ND, OH, OK, OR, PA, RI, SD, TN, TX, UT, VT, VA, WA, WI, WY, IN, MN, SC';
 
 // Qualifying comorbidities — unlock GLP-1 eligibility for BMI 25–29.9
 export const QUALIFYING_CONDITIONS = [
