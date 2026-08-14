@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import ProductCard from './ProductCard';
 import { ArrowLeft, ArrowRight, Pill, Leaf, Search, Package, Zap, Shield, Droplets, ChevronDown } from 'lucide-react';
 
-const ProductGrid = ({ products, selectedProducts, updateProductQuantity, selectedState, bmi, onBack, onNext }) => {
+const ProductGrid = ({ products, selectedProducts, updateProductQuantity, selectedState, bmi, onBack }) => {
   const [activeTab, setActiveTab] = useState('nutrition');
   const [priceSort, setPriceSort] = useState('lowToHigh');
   
@@ -15,13 +15,25 @@ const ProductGrid = ({ products, selectedProducts, updateProductQuantity, select
     });
   }, [products, activeTab, priceSort]);
 
-  const selectedCount = Object.values(selectedProducts).reduce((a, b) => a + b, 0);
-  const totalPrice = useMemo(() => {
-    return products
-      .filter(p => selectedProducts[p.id])
-      .reduce((sum, p) => sum + (p.price * selectedProducts[p.id]), 0);
-  }, [products, selectedProducts]);
+  const glpGroups = useMemo(() => {
+    if (activeTab !== 'glp') return [];
 
+    return ['Semaglutide', 'Tirzepatide']
+      .map(name => ({ name, products: filteredProducts.filter(product => product.group === name) }))
+      .filter(group => group.products.length > 0);
+  }, [activeTab, filteredProducts]);
+
+  const renderProductCard = (product) => (
+    <ProductCard
+      key={product.id}
+      product={product}
+      quantity={selectedProducts[product.id] || 0}
+      onIncrement={() => updateProductQuantity(product.id, 1)}
+      onDecrement={() => updateProductQuantity(product.id, -1)}
+    />
+  );
+
+  const selectedCount = Object.values(selectedProducts).reduce((a, b) => a + b, 0);
   const tabs = [
     { key: 'nutrition', label: 'Nutrition Services', Icon: Leaf },
     { key: 'glp', label: 'GLP Products', Icon: Pill },
@@ -136,22 +148,23 @@ const ProductGrid = ({ products, selectedProducts, updateProductQuantity, select
       </div>
 
       {/* Product Grid */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', 
-        gap: '2rem',
-        alignItems: 'start'
-      }}>
+      <div>
         {filteredProducts.length > 0 ? (
-          filteredProducts.map((product) => (
-            <ProductCard 
-              key={product.id} 
-              product={product} 
-              quantity={selectedProducts[product.id] || 0}
-              onIncrement={() => updateProductQuantity(product.id, 1)}
-              onDecrement={() => updateProductQuantity(product.id, -1)}
-            />
-          ))
+          activeTab === 'glp' ? glpGroups.map(group => (
+            <section key={group.name} style={{ marginBottom: '3rem' }}>
+              <div style={{ marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '2px solid rgba(212, 175, 55, 0.35)' }}>
+                <h3 style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--primary)', margin: 0 }}>{group.name}</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: '500', margin: '0.25rem 0 0' }}>All listed prices are paid up front.</p>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '2rem', alignItems: 'start' }}>
+                {group.products.map(renderProductCard)}
+              </div>
+            </section>
+          )) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '2rem', alignItems: 'start' }}>
+              {filteredProducts.map(renderProductCard)}
+            </div>
+          )
         ) : (
           <div className="card glass" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 3rem' }}>
             <Search size={48} color="var(--text-muted)" style={{ marginBottom: '1rem', opacity: 0.5 }} />
