@@ -328,7 +328,7 @@ export const PRODUCTS = [
   { id: 'tirz_starter_3mo', type: 'glp', group: 'Tirzepatide', category: 'medicine', name: 'Starter Package: Tirzepatide 3 Months', price: 897.00, usage: 'Up Front', allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
   { id: 'tirz_starter_6mo', type: 'glp', group: 'Tirzepatide', category: 'medicine', name: 'Starter Package: Tirzepatide 6 Months', price: 1494.00, usage: 'Up Front', allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
   { id: 'tirz_starter_12mo', type: 'glp', group: 'Tirzepatide', category: 'medicine', name: 'Starter Package: Tirzepatide 12 Months', price: 2820.00, usage: 'Up Front', allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
-  { id: 'tirz60_1mo', type: 'glp', group: 'Tirzepatide', category: 'medicine', name: 'Tirzepatide 60mg - 1 Month', price: 599.00, usage: 'Up Front', allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'tirz60_1mo', type: 'glp', group: 'Tirzepatide', category: 'medicine', name: 'Single Purchase: Tirzepatide 60mg - 1 Month', price: 599.00, usage: 'Up Front', allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
 
   // ============================================================
   // STANDALONE MEDICAL / INJECTABLES (state restricted, NO BMI req)
