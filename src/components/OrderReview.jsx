@@ -98,28 +98,39 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
   const [linksOpen, setLinksOpen] = useState(true);
   const [copiedLink, setCopiedLink] = useState(null);
 
-  // Map product IDs → sheet LINK TAGS
-  const PRODUCT_LINK_TAGS = {
-    sema1: 'Sema1mg',
-    sema3: 'Sema3mg',
-    sema7: 'Sema7mg',
-    sema10: 'Sema10mg',
-    sema_micro: 'SemaMicro',
-    tirz8: 'Tirze8mg',
-    tirz24: 'Tirze24mg',
-    tirz52: 'Tirze52mg',
-    tirz60: 'Tirze60mg',
-    tirz_micro: 'TirzeMicro',
-    nad: 'NAD',
-    nad_3mo: 'NAD + 3Months',
-    lipo: 'LipoMino - One Time 30-day Purchase',
-    lipo_3mo: 'LipoMino - One Time 90-day Purchase',
-    ghkcu_1mo: 'GHK-Cu Troches - One month',
-    ghkcu_3mo: 'GHK-Cu Troches - 3 Months',
-    sermorelin_1mo: 'Sermorelin (One Time / 30-Day Supply)',
-    sermorelin_2mo: 'Sermorelin (One Time / 60-Day Supply)',
-    glutathione_2mo: 'Glutathione 2 Months',
-    glutathione_4mo: 'Glutathione 4 Months',
+  // Map catalog product IDs to provider-specific keys returned by /api/sheet-links.
+  const PRODUCT_LINK_KEYS = {
+    sema_micro_2mo: { strive: 'Semaglutide Microdose', absolute: 'SemaMicro' },
+    sema_starter_3mo: { strive: 'Semaglutide 3 Months' },
+    sema_starter_6mo: { strive: 'Semaglutide 6 Months' },
+    sema_starter_12mo: { strive: 'Semaglutide 12 Months' },
+    sema10_1mo: { absolute: 'Sema10mg' },
+    tirz_micro_2mo: { strive: 'Tirzepatide Microdose' },
+    tirz_starter_3mo: { strive: 'Tirzepatide 3 Months' },
+    tirz_starter_6mo: { strive: 'Tirzepatide 6 Months' },
+    tirz_starter_12mo: { strive: 'Tirzepatide 12 Months' },
+    nad: { strive: 'NAD' },
+    nad_3mo: { strive: 'NAD + 3Months' },
+    lipo: { strive: 'LipoMino - One Time 30-day Purchase' },
+    lipo_3mo: { strive: 'LipoMino - One Time 90-day Purchase' },
+    ghkcu_1mo: { strive: 'GHK-Cu Troches - One month' },
+    ghkcu_3mo: { strive: 'GHK-Cu Troches - 3 Months' },
+    sermorelin_1mo: { strive: 'Sermorelin (One Time / 30-Day Supply)' },
+    sermorelin_2mo: { strive: 'Sermorelin (One Time / 60-Day Supply)' },
+    glutathione_2mo: { strive: 'Glutathione 2 Months' },
+    glutathione_4mo: { strive: 'Glutathione 4 Months' },
+  };
+
+  const getProductTreatmentLinks = (productId) => {
+    const keys = PRODUCT_LINK_KEYS[productId];
+    if (!keys || !sheetLinks) return null;
+
+    const entry = {
+      striveLink: keys.strive ? sheetLinks[keys.strive]?.striveLink : undefined,
+      absoluteLink: keys.absolute ? sheetLinks[keys.absolute]?.absoluteLink : undefined,
+    };
+
+    return entry.striveLink || entry.absoluteLink ? entry : null;
   };
 
   useEffect(() => {
@@ -402,9 +413,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
               <p style={{ color: '#dc2626', fontSize: '0.875rem', textAlign: 'center', padding: '1rem 0' }}>Could not load links — API server may not be running.</p>
             )}
             {!linksLoading && sheetLinks && selectedProducts.map(product => {
-              const tag = PRODUCT_LINK_TAGS[product.id];
-              if (!tag) return null;
-              const entry = sheetLinks[tag];
+              const entry = getProductTreatmentLinks(product.id);
               if (!entry) return null;
               return (
                 <div key={product.id} style={{ background: 'rgba(255,255,255,0.55)', borderRadius: '16px', padding: '1rem 1.25rem', border: '1px solid var(--glass-border)' }}>
@@ -442,7 +451,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
                 </div>
               );
             })}
-            {!linksLoading && sheetLinks && selectedProducts.every(p => !PRODUCT_LINK_TAGS[p.id] || !sheetLinks[PRODUCT_LINK_TAGS[p.id]]) && (
+            {!linksLoading && sheetLinks && selectedProducts.every(p => !getProductTreatmentLinks(p.id)) && (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', textAlign: 'center', padding: '0.5rem' }}>No treatment links available for the selected products.</p>
             )}
           </div>
