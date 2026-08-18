@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, CreditCard, Leaf, Pill, Link, Check, Copy, Package, ShoppingCart, Tag, ExternalLink, ChevronDown, ChevronUp, Loader, Clock } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CreditCard, Leaf, Pill, Link, Check, Copy, Package, ShoppingCart, ExternalLink, ChevronDown, ChevronUp, Loader, Clock } from 'lucide-react';
 import {
   STATES,
   PRODUCTS,
@@ -8,7 +8,6 @@ import {
 } from '../utils/data';
 
 const COUPONS = [
-  { code: 'J9TKDLDJ', discount: 10 },
   { code: 'SNDN34CX', discount: 20 },
   { code: 'GVK44L33', discount: 30 },
   { code: 'ZM4L5732', discount: 40 },
@@ -79,7 +78,6 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
   const [copiedInvoice, setCopiedInvoice] = useState(false);
   const [error, setError] = useState(null);
   const [paymentType, setPaymentType] = useState('onetime');
-  const [discount, setDiscount] = useState(0);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [couponCopied, setCouponCopied] = useState(false);
 
@@ -147,29 +145,13 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
     setTimeout(() => setCopiedLink(null), 2000);
   };
 
-  const isGLPProduct = (product) => {
-    const name = product.name.toLowerCase();
-    return name.includes('semaglutide') || name.includes('tirzepatide');
-  };
-
-  const getDiscountedPrice = (product) => {
-    if (!isGLPProduct(product) || paymentType === 'paylater') return product.price;
-    const discountAmount = product.price * (discount / 100);
-    return product.price - discountAmount;
-  };
-
   const baseTotal = selectedProducts.reduce((sum, p) => {
     const qty = p.quantity || 1;
-    const unitPrice = getDiscountedPrice(p);
-    return sum + (unitPrice * qty);
+    return sum + (p.price * qty);
   }, 0);
 
-  const glpDiscountTotal = selectedProducts
-    .filter(p => isGLPProduct(p))
-    .reduce((sum, p) => sum + ((p.price - getDiscountedPrice(p)) * (p.quantity || 1)), 0);
-
   const feeAmount = (paymentType === 'installment' || paymentType === 'paylater') ? baseTotal * 0.06 : 0;
-  // Calculate Zelle discount on the base total (after GLP discounts)
+  // Calculate Zelle discount on the base total.
   const zelleDiscount = paymentType === 'zelle_venmo_cashapp' ? baseTotal * 0.02 : 0;
   const totalWithFee = baseTotal + feeAmount - zelleDiscount;
 
@@ -194,7 +176,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
           body: JSON.stringify({
             products: selectedProducts.map(p => ({
               ...p,
-              price: getDiscountedPrice(p)
+              price: p.price
             })),
             paymentType: 'installment', // sends 6% fee included
             totalWithFee,
@@ -227,15 +209,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          products: selectedProducts.map(p => {
-            const hasDiscount = isGLPProduct(p) && discount > 0;
-            const updatedName = hasDiscount ? `${p.name} (-${discount}%)` : p.name;
-            return {
-              ...p,
-              name: updatedName,
-              price: getDiscountedPrice(p)
-            };
-          }),
+          products: selectedProducts,
           paymentType,
           totalWithFee,
           feeAmount
@@ -320,8 +294,6 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {selectedProducts.map((product) => {
             const qty = product.quantity || 1;
-            const discountedPrice = getDiscountedPrice(product);
-            const hasDiscount = isGLPProduct(product) && discount > 0;
             return (
               <div
                 key={product.id}
@@ -358,20 +330,10 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
                         {product.usage}
                       </div>
                     )}
-                    {hasDiscount && (
-                      <div style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: '700', marginTop: '2px' }}>
-                        (-{discount}%)
-                      </div>
-                    )}
                   </div>
                 </div>
                 <div style={{ fontWeight: '800', fontSize: '1.125rem', color: 'var(--text-main)', flexShrink: 0, marginLeft: '1rem', textAlign: 'right' }}>
-                  ${discountedPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  {hasDiscount && (
-                    <div style={{ fontSize: '0.75rem', color: '#999', textDecoration: 'line-through', fontWeight: '500' }}>
-                      ${(product.price * qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </div>
-                  )}
+                  ${(product.price * qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </div>
               </div>
             );
@@ -522,67 +484,6 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
         </div>
       </div>
 
-      {selectedProducts.some(p => isGLPProduct(p)) && (
-        <div className="card glass" style={{ marginBottom: '2rem', padding: '1.5rem' }}>
-          <h3 style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Tag size={14} /> GLP DISCOUNT
-          </h3>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <button
-              onClick={() => setDiscount(0)}
-              style={{
-                flex: 1,
-                padding: '1rem 1.5rem',
-                borderRadius: '12px',
-                border: discount === 0 ? '2px solid var(--primary)' : '1px solid var(--glass-border)',
-                background: discount === 0 ? 'rgba(212, 175, 55, 0.15)' : 'rgba(255, 255, 255, 0.4)',
-                color: discount === 0 ? 'var(--primary)' : 'var(--text-muted)',
-                fontWeight: '700',
-                fontSize: '0.9375rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-            >
-              No Discount
-            </button>
-            <button
-              onClick={() => setDiscount(5)}
-              style={{
-                flex: 1,
-                padding: '1rem 1.5rem',
-                borderRadius: '12px',
-                border: discount === 5 ? '2px solid var(--primary)' : '1px solid var(--glass-border)',
-                background: discount === 5 ? 'rgba(212, 175, 55, 0.15)' : 'rgba(255, 255, 255, 0.4)',
-                color: discount === 5 ? 'var(--primary)' : 'var(--text-muted)',
-                fontWeight: '700',
-                fontSize: '0.9375rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-            >
-              5% Off
-            </button>
-            <button
-              onClick={() => setDiscount(10)}
-              style={{
-                flex: 1,
-                padding: '1rem 1.5rem',
-                borderRadius: '12px',
-                border: discount === 10 ? '2px solid var(--primary)' : '1px solid var(--glass-border)',
-                background: discount === 10 ? 'rgba(212, 175, 55, 0.15)' : 'rgba(255, 255, 255, 0.4)',
-                color: discount === 10 ? 'var(--primary)' : 'var(--text-muted)',
-                fontWeight: '700',
-                fontSize: '0.9375rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-            >
-              10% Off
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Payment Type Selection */}
       <div className="card glass" style={{ padding: '1.5rem' }}>
         <h3 style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginBottom: '1rem' }}>
@@ -705,9 +606,8 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
               <div style={{ fontSize: '1.75rem', fontWeight: '800', color: '#14532d' }}>
                 ${totalWithFee.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </div>
-              {(glpDiscountTotal > 0 || zelleDiscount > 0) && (
+              {zelleDiscount > 0 && (
                 <div style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: '700', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  {glpDiscountTotal > 0 && <span>GLP Savings: ${glpDiscountTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>}
                   {zelleDiscount > 0 && <span>Zelle/Venmo 2% Discount: -${zelleDiscount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>}
                 </div>
               )}
@@ -829,7 +729,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
                         items: selectedProducts.map(p => ({
                           name: p.name,
                           quantity: p.quantity || 1,
-                          unitPrice: getDiscountedPrice(p),
+                          unitPrice: p.price,
                         })),
                       };
                       const encoded = btoa(JSON.stringify(data));
@@ -1043,7 +943,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
                       items: selectedProducts.map(p => ({
                         name: p.name,
                         quantity: p.quantity || 1,
-                        unitPrice: getDiscountedPrice(p),
+                        unitPrice: p.price,
                       })),
                     };
                     const encoded = btoa(JSON.stringify(data));
