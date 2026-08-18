@@ -423,7 +423,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     {entry.striveLink && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '0.6875rem', fontWeight: '700', color: '#64748b', background: '#f1f5f9', borderRadius: '6px', padding: '2px 8px', flexShrink: 0 }}>STRIVE</span>
+                        <span style={{ fontSize: '0.6875rem', fontWeight: '700', color: '#64748b', background: '#f1f5f9', borderRadius: '6px', padding: '2px 8px', flexShrink: 0 }}>PRX Pharmacy</span>
                         <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.striveLink}</span>
                         <button onClick={() => handleCopySheetLink(entry.striveLink, `${product.id}-strive`)} style={{ flexShrink: 0, background: '#e2e8f0', border: 'none', borderRadius: '8px', padding: '5px 10px', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                           {copiedLink === `${product.id}-strive` ? <Check size={12} color="#16a34a" /> : <Copy size={12} />}
