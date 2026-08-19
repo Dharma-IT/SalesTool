@@ -98,25 +98,25 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
 
   // Map catalog product IDs to provider-specific keys returned by /api/sheet-links.
   const PRODUCT_LINK_KEYS = {
-    sema_micro_2mo: { strive: 'Semaglutide Microdose', absolute: 'SemaMicro' },
-    sema_starter_3mo: { strive: 'Semaglutide 3 Months' },
-    sema_starter_6mo: { strive: 'Semaglutide 6 Months' },
-    sema_starter_12mo: { strive: 'Semaglutide 12 Months' },
-    sema10_1mo: { absolute: 'SemaSingle' },
-    tirz_micro_2mo: { strive: 'Tirzepatide Microdose' },
-    tirz_starter_3mo: { strive: 'Tirzepatide 3 Months' },
-    tirz_starter_6mo: { strive: 'Tirzepatide 6 Months' },
-    tirz_starter_12mo: { strive: 'Tirzepatide 12 Months' },
-    nad: { strive: 'NAD' },
-    nad_3mo: { strive: 'NAD + 3Months' },
-    lipo: { strive: 'LipoMino - One Time 30-day Purchase' },
-    lipo_3mo: { strive: 'LipoMino - One Time 90-day Purchase' },
-    ghkcu_1mo: { strive: 'GHK-Cu Troches - One month' },
-    ghkcu_3mo: { strive: 'GHK-Cu Troches - 3 Months' },
-    sermorelin_1mo: { strive: 'Sermorelin (One Time / 30-Day Supply)' },
-    sermorelin_2mo: { strive: 'Sermorelin (One Time / 60-Day Supply)' },
-    glutathione_2mo: { strive: 'Glutathione 2 Months' },
-    glutathione_4mo: { strive: 'Glutathione 4 Months' },
+    sema_micro_2mo: { prx: 'Semaglutide Microdose', absolute: 'SemaMicro' },
+    sema_starter_3mo: { prx: 'Semaglutide 3 Months' },
+    sema_starter_6mo: { prx: 'Semaglutide 6 Months' },
+    sema_starter_12mo: { prx: 'Semaglutide 12 Months' },
+    sema10_1mo: { prx: 'Semaglutide Single Purchase' },
+    tirz_micro_2mo: { prx: 'Tirzepatide Microdose' },
+    tirz_starter_3mo: { prx: 'Tirzepatide 3 Months' },
+    tirz_starter_6mo: { prx: 'Tirzepatide 6 Months' },
+    tirz_starter_12mo: { prx: 'Tirzepatide 12 Months' },
+    nad: { prx: 'NAD' },
+    nad_3mo: { prx: 'NAD + 3Months' },
+    lipo: { prx: 'LipoMino - One Time 30-day Purchase' },
+    lipo_3mo: { prx: 'LipoMino - One Time 90-day Purchase' },
+    ghkcu_1mo: { prx: 'GHK-Cu Troches - One month' },
+    ghkcu_3mo: { prx: 'GHK-Cu Troches - 3 Months' },
+    sermorelin_1mo: { prx: 'Sermorelin (One Time / 30-Day Supply)' },
+    sermorelin_2mo: { prx: 'Sermorelin (One Time / 60-Day Supply)' },
+    glutathione_2mo: { prx: 'Glutathione 2 Months' },
+    glutathione_4mo: { prx: 'Glutathione 4 Months' },
   };
 
   const getProductTreatmentLinks = (productId) => {
@@ -124,11 +124,11 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
     if (!keys || !sheetLinks) return null;
 
     const entry = {
-      striveLink: keys.strive ? sheetLinks[keys.strive]?.striveLink : undefined,
+      prxLink: keys.prx ? sheetLinks[keys.prx]?.prxLink : undefined,
       absoluteLink: keys.absolute ? sheetLinks[keys.absolute]?.absoluteLink : undefined,
     };
 
-    return entry.striveLink || entry.absoluteLink ? entry : null;
+    return entry.prxLink || entry.absoluteLink ? entry : null;
   };
 
   useEffect(() => {
@@ -383,15 +383,15 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
                     {product.name}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {entry.striveLink && (
+                    {entry.prxLink && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontSize: '0.6875rem', fontWeight: '700', color: '#64748b', background: '#f1f5f9', borderRadius: '6px', padding: '2px 8px', flexShrink: 0 }}>PRX Pharmacy</span>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.striveLink}</span>
-                        <button onClick={() => handleCopySheetLink(entry.striveLink, `${product.id}-strive`)} style={{ flexShrink: 0, background: '#e2e8f0', border: 'none', borderRadius: '8px', padding: '5px 10px', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          {copiedLink === `${product.id}-strive` ? <Check size={12} color="#16a34a" /> : <Copy size={12} />}
-                          {copiedLink === `${product.id}-strive` ? 'Copied' : 'Copy'}
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.prxLink}</span>
+                        <button onClick={() => handleCopySheetLink(entry.prxLink, `${product.id}-prx`)} style={{ flexShrink: 0, background: '#e2e8f0', border: 'none', borderRadius: '8px', padding: '5px 10px', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          {copiedLink === `${product.id}-prx` ? <Check size={12} color="#16a34a" /> : <Copy size={12} />}
+                          {copiedLink === `${product.id}-prx` ? 'Copied' : 'Copy'}
                         </button>
-                        <a href={entry.striveLink} target="_blank" rel="noreferrer" style={{ flexShrink: 0, background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '8px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', color: 'var(--primary)', fontSize: '0.75rem', fontWeight: '700' }}>
+                        <a href={entry.prxLink} target="_blank" rel="noreferrer" style={{ flexShrink: 0, background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '8px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', color: 'var(--primary)', fontSize: '0.75rem', fontWeight: '700' }}>
                           <ExternalLink size={12} /> Open
                         </a>
                       </div>

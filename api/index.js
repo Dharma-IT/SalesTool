@@ -80,7 +80,7 @@ app.get('/api/sheet-links', async (req, res) => {
     // Split into rows (handle both \r\n and \n)
     const rows = csv.split(/\r?\n/).map(r => parseCSVRow(r));
 
-    // Left table (Strive):  col2 = LINK TAGS, col3 = CREATED LINKS
+    // Left table (PRX Pharmacy): col2 = LINK NAME, col3 = CREATED LINKS
     // Right table (Absolute): col7 = LINK TAGS, col8 = CREATED LINKS
     // Row 0 = domain header, Row 1 = column headers, Rows 2+ = data
     const links = {};
@@ -89,16 +89,16 @@ app.get('/api/sheet-links', async (req, res) => {
       const row = rows[i];
       if (!row || row.length < 4) continue;
 
-      // Skip separator rows (e.g. "STRIVE,,,,,,,,,")
-      if (row[0] === 'STRIVE') continue;
+      // Skip legacy/current provider separator rows.
+      if (row[0] === 'STRIVE' || row[0] === 'PRX') continue;
 
-      // Left (Strive) table
-      const striveTag = row[2];
-      const striveLink = row[3];
-      const striveName = row[0];
-      if (striveTag && striveLink && striveLink.startsWith('http')) {
-        if (!links[striveTag]) links[striveTag] = { displayName: striveName };
-        links[striveTag].striveLink = striveLink;
+      // Left (PRX Pharmacy) table
+      const prxName = row[2];
+      const prxLink = row[3];
+      const prxTag = row[0];
+      if (prxName && prxLink && prxLink.startsWith('http')) {
+        if (!links[prxName]) links[prxName] = { displayName: prxTag };
+        links[prxName].prxLink = prxLink;
       }
 
       // Right (Absolute) table
