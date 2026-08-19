@@ -102,7 +102,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
     sema_starter_3mo: { strive: 'Semaglutide 3 Months' },
     sema_starter_6mo: { strive: 'Semaglutide 6 Months' },
     sema_starter_12mo: { strive: 'Semaglutide 12 Months' },
-    sema10_1mo: { absolute: 'Sema10mg' },
+    sema10_1mo: { absolute: 'SemaSingle' },
     tirz_micro_2mo: { strive: 'Tirzepatide Microdose' },
     tirz_starter_3mo: { strive: 'Tirzepatide 3 Months' },
     tirz_starter_6mo: { strive: 'Tirzepatide 6 Months' },
