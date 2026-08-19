@@ -107,6 +107,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
     tirz_starter_3mo: { prx: 'Tirzepatide 3 Months' },
     tirz_starter_6mo: { prx: 'Tirzepatide 6 Months' },
     tirz_starter_12mo: { prx: 'Tirzepatide 12 Months' },
+    tirz60_1mo: { prx: 'Tirzepatide Single Purchase' },
     nad: { prx: 'NAD' },
     nad_3mo: { prx: 'NAD + 3Months' },
     lipo: { prx: 'LipoMino - One Time 30-day Purchase' },
