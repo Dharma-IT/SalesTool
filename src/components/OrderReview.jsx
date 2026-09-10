@@ -222,10 +222,16 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
           splitPayment
         })
       });
-      const data = await response.json();
+      const responseText = await response.text();
+      let data;
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        data = {};
+      }
 
       if (!response.ok) {
-        throw new Error(data.error || `Server error (${response.status})`);
+        throw new Error(data.error || `Payment server error (${response.status}). Please try again.`);
       }
 
       if (Array.isArray(data.urls) && data.urls.length === 2) {
@@ -234,7 +240,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
       } else if (data.url) {
         setPaymentLink(data.url);
       } else {
-        throw new Error('No payment URL returned from server');
+        throw new Error('The payment server returned no links. Please try again.');
       }
     } catch (err) {
       console.error('Error creating payment link:', err);
