@@ -75,6 +75,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
   const [paymentLink, setPaymentLink] = useState(null);
   const [splitPayment, setSplitPayment] = useState(false);
   const [splitPaymentLinks, setSplitPaymentLinks] = useState([]);
+  const [splitCreatingPart, setSplitCreatingPart] = useState(null);
   const [manualPaymentConfirm, setManualPaymentConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedInvoice, setCopiedInvoice] = useState(false);
@@ -211,42 +212,39 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
         return;
       }
 
-      const response = await fetch('/api/create-payment-link', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          products: selectedProducts,
-          paymentType,
-          totalWithFee,
-          feeAmount,
-          splitPayment
-        })
-      });
-      const responseText = await response.text();
-      let data;
-      try {
-        data = responseText ? JSON.parse(responseText) : {};
-      } catch {
-        data = {};
-      }
+      const createLink = async (extraBody = {}) => {
+        const response = await fetch('/api/create-payment-link', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ products: selectedProducts, paymentType, totalWithFee, feeAmount, ...extraBody })
+        });
+        const responseText = await response.text();
+        let data;
+        try { data = responseText ? JSON.parse(responseText) : {}; } catch { data = {}; }
+        if (!response.ok) throw new Error(data.error || `Payment server error (${response.status}). Please try again.`);
+        if (!data.url) throw new Error('The payment server returned no link. Please try again.');
+        return data.url;
+      };
 
-      if (!response.ok) {
-        throw new Error(data.error || `Payment server error (${response.status}). Please try again.`);
-      }
-
-      if (Array.isArray(data.urls) && data.urls.length === 2) {
-        setSplitPaymentLinks(data.urls);
-        setPaymentLink(data.urls[0]);
-      } else if (data.url) {
-        setPaymentLink(data.url);
+      if (splitPayment) {
+        const splitGroup = `split_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+        const urls = [];
+        for (let part = 1; part <= 2; part += 1) {
+          setSplitCreatingPart(part);
+          const url = await createLink({ splitPayment: true, splitPart: part, splitGroup });
+          urls.push(url);
+          setSplitPaymentLinks([...urls]);
+        }
+        setPaymentLink(urls[0]);
       } else {
-        throw new Error('The payment server returned no links. Please try again.');
+        setPaymentLink(await createLink());
       }
     } catch (err) {
       console.error('Error creating payment link:', err);
       setError(err.message || 'Failed to create payment link. Please try again.');
     } finally {
       setLoading(false);
+      setSplitCreatingPart(null);
     }
   };
 
@@ -707,7 +705,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
                     onClick={handleConfirm}
                     disabled={loading}
                   >
-                    {loading ? 'Creating...' : 'Yes, Proceed'}
+                    {loading ? (splitCreatingPart ? `Creating link ${splitCreatingPart} of 2...` : 'Creating...') : 'Yes, Proceed'}
                   </button>
                 </div>
                 {error && (

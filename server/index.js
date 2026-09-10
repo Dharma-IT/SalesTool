@@ -49,7 +49,7 @@ app.get('/api/shopify-prices', async (req, res) => {
 
 app.post('/api/create-payment-link', async (req, res) => {
   try {
-    const { products, paymentType, totalWithFee, feeAmount, splitPayment } = req.body;
+    const { products, paymentType, totalWithFee, feeAmount, splitPayment, splitPart, splitGroup } = req.body;
     
     if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: 'No products provided' });
@@ -64,30 +64,19 @@ app.post('/api/create-payment-link', async (req, res) => {
         return res.status(400).json({ error: 'The payment total must be at least $0.02 to split.' });
       }
 
+      const part = Number(splitPart);
+      if (part !== 1 && part !== 2) return res.status(400).json({ error: 'Invalid split payment part.' });
       const amounts = [Math.floor(totalCents / 2), Math.ceil(totalCents / 2)];
-      const splitGroup = `split_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-      const links = await Promise.all(amounts.map((amount, index) => {
-        const config = {
-          line_items: [{
-            price_data: {
-              currency: 'usd',
-              unit_amount: amount,
-              product_data: {
-                name: `Dharma order - Part ${index + 1} of 2`,
-                metadata: { category: 'split_payment', split_part: String(index + 1) },
-              },
-            },
-            quantity: 1,
-          }],
-          phone_number_collection: { enabled: true },
-          after_completion: { type: 'redirect', redirect: { url: 'https://dharmanutritionclinic.com' } },
-          metadata: { order_type: isInstallment ? 'installment' : 'onetime', split_payment: 'true', split_group: splitGroup, split_part: String(index + 1), split_total: '2' },
-        };
-        if (isInstallment) config.payment_method_types = ['card', 'afterpay_clearpay', 'klarna', 'affirm'];
-        return stripe.paymentLinks.create(config);
-      }));
-      const urls = links.map(link => link.url);
-      return res.json({ urls, amounts: amounts.map(amount => amount / 100) });
+      const amount = amounts[part - 1];
+      const config = {
+        line_items: [{ price_data: { currency: 'usd', unit_amount: amount, product_data: { name: `Dharma order - Part ${part} of 2`, metadata: { category: 'split_payment', split_part: String(part) } } }, quantity: 1 }],
+        phone_number_collection: { enabled: true },
+        after_completion: { type: 'redirect', redirect: { url: 'https://dharmanutritionclinic.com' } },
+        metadata: { order_type: isInstallment ? 'installment' : 'onetime', split_payment: 'true', split_group: String(splitGroup || ''), split_part: String(part), split_total: '2' },
+      };
+      if (isInstallment) config.payment_method_types = ['card', 'afterpay_clearpay', 'klarna', 'affirm'];
+      const link = await stripe.paymentLinks.create(config);
+      return res.json({ url: link.url, amount: amount / 100, part });
     }
 
     console.log(`--- Creating Payment Link ---`);
