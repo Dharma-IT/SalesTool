@@ -131,13 +131,41 @@ app.post('/api/create-payment-link', async (req, res) => {
       throw new Error('Stripe is not configured. Please add STRIPE_SECRET_KEY to environment variables.');
     }
 
-    const { products, paymentType, totalWithFee, feeAmount } = req.body;
+    const { products, paymentType, totalWithFee, feeAmount, splitPayment } = req.body;
 
     if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: 'No products provided' });
     }
 
     const isInstallment = paymentType && paymentType.toLowerCase() === 'installment';
+
+    if (splitPayment) {
+      const totalCents = Math.round(Number(totalWithFee) * 100);
+      if (!Number.isSafeInteger(totalCents) || totalCents < 2) {
+        return res.status(400).json({ error: 'The payment total must be at least $0.02 to split.' });
+      }
+
+      const amounts = [Math.floor(totalCents / 2), Math.ceil(totalCents / 2)];
+      const splitGroup = `split_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+      const urls = [];
+      for (let index = 0; index < amounts.length; index += 1) {
+        const stripeProduct = await stripe.products.create({
+          name: `Dharma order - Part ${index + 1} of 2`,
+          metadata: { category: 'split_payment', split_part: String(index + 1) },
+        });
+        const price = await stripe.prices.create({ product: stripeProduct.id, unit_amount: amounts[index], currency: 'usd' });
+        const config = {
+          line_items: [{ price: price.id, quantity: 1 }],
+          phone_number_collection: { enabled: true },
+          after_completion: { type: 'redirect', redirect: { url: 'https://dharmanutritionclinic.com' } },
+          metadata: { order_type: isInstallment ? 'installment' : 'onetime', split_payment: 'true', split_group: splitGroup, split_part: String(index + 1), split_total: '2' },
+        };
+        if (isInstallment) config.payment_method_types = ['card', 'afterpay_clearpay', 'klarna', 'affirm'];
+        const link = await stripe.paymentLinks.create(config);
+        urls.push(link.url);
+      }
+      return res.json({ urls, amounts: amounts.map(amount => amount / 100) });
+    }
 
     const lineItems = [];
 

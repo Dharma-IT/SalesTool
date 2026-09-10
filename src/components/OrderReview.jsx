@@ -73,6 +73,8 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [paymentLink, setPaymentLink] = useState(null);
+  const [splitPayment, setSplitPayment] = useState(false);
+  const [splitPaymentLinks, setSplitPaymentLinks] = useState([]);
   const [manualPaymentConfirm, setManualPaymentConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedInvoice, setCopiedInvoice] = useState(false);
@@ -158,6 +160,8 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
 
   const biweekly = paymentType === 'installment' ? (totalWithFee / 4).toFixed(2) : null;
   const sixMonth = paymentType === 'installment' ? (totalWithFee / 6).toFixed(2) : null;
+  const totalCents = Math.round(totalWithFee * 100);
+  const splitAmounts = [Math.floor(totalCents / 2) / 100, Math.ceil(totalCents / 2) / 100];
 
   const handleConfirm = async () => {
     if (paymentType === 'zelle_venmo_cashapp') {
@@ -198,9 +202,10 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
 
     setLoading(true);
     setError(null);
+    setSplitPaymentLinks([]);
     try {
       // For single product with an existing Stripe link, use it directly
-      if (selectedProducts.length === 1 && selectedProducts[0].link) {
+      if (!splitPayment && selectedProducts.length === 1 && selectedProducts[0].link) {
         setPaymentLink(selectedProducts[0].link);
         setLoading(false);
         return;
@@ -213,7 +218,8 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
           products: selectedProducts,
           paymentType,
           totalWithFee,
-          feeAmount
+          feeAmount,
+          splitPayment
         })
       });
       const data = await response.json();
@@ -222,7 +228,10 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
         throw new Error(data.error || `Server error (${response.status})`);
       }
 
-      if (data.url) {
+      if (Array.isArray(data.urls) && data.urls.length === 2) {
+        setSplitPaymentLinks(data.urls);
+        setPaymentLink(data.urls[0]);
+      } else if (data.url) {
         setPaymentLink(data.url);
       } else {
         throw new Error('No payment URL returned from server');
@@ -256,6 +265,12 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
   const handleCopyLink = () => {
     navigator.clipboard.writeText(paymentLink);
     setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopySplitLink = (link, index) => {
+    navigator.clipboard.writeText(link);
+    setCopied(index);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -526,7 +541,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
             Installment = Processing & Handling (6% fee)
           </button>
           <button
-            onClick={() => setPaymentType('zelle_venmo_cashapp')}
+            onClick={() => { setPaymentType('zelle_venmo_cashapp'); setSplitPayment(false); }}
             style={{
               flex: '1 1 120px',
               padding: '1rem',
@@ -543,7 +558,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
             ZELLE/VENMO/CASHAPP<br /><span style={{ fontSize: '0.75rem', fontWeight: '800', color: paymentType === 'zelle_venmo_cashapp' ? 'var(--primary)' : '#16a34a' }}>(2% Off)</span>
           </button>
           <button
-            onClick={() => setPaymentType('paylater')}
+            onClick={() => { setPaymentType('paylater'); setSplitPayment(false); }}
             style={{
               flex: '1 1 120px',
               padding: '1rem',
@@ -567,6 +582,22 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
             <span style={{ fontSize: '0.7rem', fontWeight: '700', color: paymentType === 'paylater' ? '#7c3aed' : '#94a3b8' }}>Send Template</span>
           </button>
         </div>
+        {(paymentType === 'onetime' || paymentType === 'installment') && (
+          <label style={{ marginTop: '1rem', padding: '1rem', borderRadius: '14px', border: splitPayment ? '2px solid var(--primary)' : '1px solid var(--glass-border)', background: splitPayment ? 'rgba(212, 175, 55, 0.08)' : 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={splitPayment}
+              onChange={(event) => setSplitPayment(event.target.checked)}
+              style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
+            />
+            <span style={{ flex: 1 }}>
+              <strong style={{ display: 'block', fontSize: '0.9rem' }}>Split into 2 payment links</strong>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                Creates one link for ${splitAmounts[0].toFixed(2)} and one for ${splitAmounts[1].toFixed(2)}.
+              </span>
+            </span>
+          </label>
+        )}
       </div>
 
       {/* Sticky Bottom Bar */}
@@ -758,9 +789,18 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
                 <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'rgba(20, 83, 45, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', animation: 'popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
                   <Link size={32} color="#14532d" />
                 </div>
-                <h3 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>Payment Link Created!</h3>
-                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '1rem', lineHeight: '1.4' }}>Share this link with your patient to complete their payment</p>
-                <div style={{
+                <h3 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>{splitPaymentLinks.length ? 'Split Payment Links Created!' : 'Payment Link Created!'}</h3>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '1rem', lineHeight: '1.4' }}>{splitPaymentLinks.length ? 'Both links must be paid to complete the order.' : 'Share this link with your patient to complete their payment'}</p>
+                {splitPaymentLinks.length ? splitPaymentLinks.map((link, index) => (
+                  <div key={link} style={{ marginBottom: '1rem', textAlign: 'left' }}>
+                    <div style={{ fontWeight: '800', fontSize: '0.8rem', marginBottom: '0.4rem', color: 'var(--primary)' }}>PART {index + 1} — ${splitAmounts[index].toFixed(2)}</div>
+                    <div style={{ padding: '0.75rem', background: 'rgba(0,0,0,0.04)', borderRadius: '12px', marginBottom: '0.5rem', wordBreak: 'break-all', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{link}</div>
+                    <button className="btn btn-primary" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }} onClick={() => handleCopySplitLink(link, index)}>
+                      {copied === index ? <Check size={18} /> : <Copy size={18} />}
+                      {copied === index ? 'Link Copied!' : `Copy Part ${index + 1} Link`}
+                    </button>
+                  </div>
+                )) : <><div style={{
                   padding: '1rem',
                   background: 'rgba(0,0,0,0.04)',
                   borderRadius: '12px',
@@ -779,10 +819,11 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
                   {copied ? <Check size={18} /> : <Copy size={18} />}
                   {copied ? 'Link Copied!' : 'Copy Link'}
                 </button>
+                </>}
                 <button
                   className="btn"
                   style={{ width: '100%', marginTop: '0.75rem', background: 'rgba(0,0,0,0.05)', border: '1px solid var(--border)' }}
-                  onClick={() => { setShowConfirm(false); setPaymentLink(null); }}
+                  onClick={() => { setShowConfirm(false); setPaymentLink(null); setSplitPaymentLinks([]); }}
                 >
                   Close
                 </button>
