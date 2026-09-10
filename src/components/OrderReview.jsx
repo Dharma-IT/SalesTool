@@ -69,6 +69,16 @@ const translateDuration = (productName, lang) => {
   return translated;
 };
 
+const calculateSplitAmounts = (totalCents, count, firstAmountCents = null) => {
+  const remainingCents = firstAmountCents === null ? totalCents : totalCents - firstAmountCents;
+  const remainingLinks = firstAmountCents === null ? count : count - 1;
+  if (remainingLinks < 1 || remainingCents < remainingLinks) return [];
+  const base = Math.floor(remainingCents / remainingLinks);
+  const extra = remainingCents % remainingLinks;
+  const amounts = Array.from({ length: remainingLinks }, (_, index) => base + (index < extra ? 1 : 0));
+  return firstAmountCents === null ? amounts : [firstAmountCents, ...amounts];
+};
+
 const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -76,6 +86,9 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
   const [splitPayment, setSplitPayment] = useState(false);
   const [splitPaymentLinks, setSplitPaymentLinks] = useState([]);
   const [splitCreatingPart, setSplitCreatingPart] = useState(null);
+  const [splitCount, setSplitCount] = useState(2);
+  const [customFirstPayment, setCustomFirstPayment] = useState(false);
+  const [firstPaymentAmount, setFirstPaymentAmount] = useState('');
   const [manualPaymentConfirm, setManualPaymentConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedInvoice, setCopiedInvoice] = useState(false);
@@ -162,7 +175,12 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
   const biweekly = paymentType === 'installment' ? (totalWithFee / 4).toFixed(2) : null;
   const sixMonth = paymentType === 'installment' ? (totalWithFee / 6).toFixed(2) : null;
   const totalCents = Math.round(totalWithFee * 100);
-  const splitAmounts = [Math.floor(totalCents / 2) / 100, Math.ceil(totalCents / 2) / 100];
+  const firstAmountCents = customFirstPayment && firstPaymentAmount !== '' ? Math.round(Number(firstPaymentAmount) * 100) : null;
+  const splitAmountCents = calculateSplitAmounts(totalCents, splitCount, firstAmountCents);
+  const splitAmounts = splitAmountCents.map(amount => amount / 100);
+  const splitConfigurationValid = !customFirstPayment || (
+    Number.isSafeInteger(firstAmountCents) && firstAmountCents > 0 && firstAmountCents <= totalCents - (splitCount - 1)
+  );
 
   const handleConfirm = async () => {
     if (paymentType === 'zelle_venmo_cashapp') {
@@ -227,11 +245,12 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
       };
 
       if (splitPayment) {
+        if (!splitConfigurationValid) throw new Error('Enter a valid first payment that leaves at least $0.01 for every remaining link.');
         const splitGroup = `split_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
         const urls = [];
-        for (let part = 1; part <= 2; part += 1) {
+        for (let part = 1; part <= splitCount; part += 1) {
           setSplitCreatingPart(part);
-          const url = await createLink({ splitPayment: true, splitPart: part, splitGroup });
+          const url = await createLink({ splitPayment: true, splitPart: part, splitCount, firstPaymentAmount: customFirstPayment ? firstPaymentAmount : null, splitGroup });
           urls.push(url);
           setSplitPaymentLinks([...urls]);
         }
@@ -587,20 +606,40 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
           </button>
         </div>
         {(paymentType === 'onetime' || paymentType === 'installment') && (
-          <label style={{ marginTop: '1rem', padding: '1rem', borderRadius: '14px', border: splitPayment ? '2px solid var(--primary)' : '1px solid var(--glass-border)', background: splitPayment ? 'rgba(212, 175, 55, 0.08)' : 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={splitPayment}
-              onChange={(event) => setSplitPayment(event.target.checked)}
-              style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
-            />
-            <span style={{ flex: 1 }}>
-              <strong style={{ display: 'block', fontSize: '0.9rem' }}>Split into 2 payment links</strong>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                Creates one link for ${splitAmounts[0].toFixed(2)} and one for ${splitAmounts[1].toFixed(2)}.
-              </span>
-            </span>
-          </label>
+          <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '14px', border: splitPayment ? '2px solid var(--primary)' : '1px solid var(--glass-border)', background: splitPayment ? 'rgba(212, 175, 55, 0.08)' : 'rgba(255,255,255,0.4)' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+              <input type="checkbox" checked={splitPayment} onChange={(event) => setSplitPayment(event.target.checked)} style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }} />
+              <strong style={{ fontSize: '0.9rem' }}>Create multiple payment links</strong>
+            </label>
+            {splitPayment && (
+              <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--glass-border)', display: 'grid', gap: '0.85rem' }}>
+                <label style={{ display: 'grid', gap: '5px', fontSize: '0.78rem', fontWeight: '700' }}>
+                  Number of payment links
+                  <select value={splitCount} onChange={(event) => setSplitCount(Number(event.target.value))} style={{ padding: '0.7rem', borderRadius: '10px', border: '1px solid var(--glass-border)', background: 'white', fontSize: '0.85rem' }}>
+                    {[2, 3, 4, 5].map(count => <option key={count} value={count}>Split into {count} links</option>)}
+                  </select>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '9px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '700' }}>
+                  <input type="checkbox" checked={customFirstPayment} onChange={(event) => setCustomFirstPayment(event.target.checked)} style={{ accentColor: 'var(--primary)' }} />
+                  Set a custom amount for the first link
+                </label>
+                {customFirstPayment && (
+                  <label style={{ display: 'grid', gap: '5px', fontSize: '0.78rem', fontWeight: '700' }}>
+                    First payment amount
+                    <div style={{ display: 'flex', alignItems: 'center', background: 'white', border: `1px solid ${splitConfigurationValid ? 'var(--glass-border)' : '#dc2626'}`, borderRadius: '10px', paddingLeft: '0.75rem' }}>
+                      <span>$</span>
+                      <input type="number" min="0.01" step="0.01" value={firstPaymentAmount} onChange={(event) => setFirstPaymentAmount(event.target.value)} placeholder="350.00" style={{ width: '100%', padding: '0.7rem', border: 'none', outline: 'none', background: 'transparent' }} />
+                    </div>
+                  </label>
+                )}
+                {splitConfigurationValid && splitAmounts.length === splitCount ? (
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', lineHeight: '1.5' }}>
+                    {splitAmounts.map((amount, index) => <span key={index} style={{ display: 'inline-block', marginRight: '12px' }}>Link {index + 1}: <b>${amount.toFixed(2)}</b></span>)}
+                  </div>
+                ) : customFirstPayment && <div style={{ color: '#dc2626', fontSize: '0.78rem' }}>Enter a first amount below the total and leave at least $0.01 for each remaining link.</div>}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -705,7 +744,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
                     onClick={handleConfirm}
                     disabled={loading}
                   >
-                    {loading ? (splitCreatingPart ? `Creating link ${splitCreatingPart} of 2...` : 'Creating...') : 'Yes, Proceed'}
+                    {loading ? (splitCreatingPart ? `Creating link ${splitCreatingPart} of ${splitCount}...` : 'Creating...') : 'Yes, Proceed'}
                   </button>
                 </div>
                 {error && (
@@ -794,7 +833,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
                   <Link size={32} color="#14532d" />
                 </div>
                 <h3 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>{splitPaymentLinks.length ? 'Split Payment Links Created!' : 'Payment Link Created!'}</h3>
-                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '1rem', lineHeight: '1.4' }}>{splitPaymentLinks.length ? 'Both links must be paid to complete the order.' : 'Share this link with your patient to complete their payment'}</p>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '1rem', lineHeight: '1.4' }}>{splitPaymentLinks.length ? `All ${splitPaymentLinks.length} links must be paid to complete the order.` : 'Share this link with your patient to complete their payment'}</p>
                 {splitPaymentLinks.length ? splitPaymentLinks.map((link, index) => (
                   <div key={link} style={{ marginBottom: '1rem', textAlign: 'left' }}>
                     <div style={{ fontWeight: '800', fontSize: '0.8rem', marginBottom: '0.4rem', color: 'var(--primary)' }}>PART {index + 1} — ${splitAmounts[index].toFixed(2)}</div>
