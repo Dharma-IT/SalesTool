@@ -199,14 +199,11 @@ const translateProductName = (product, lang) => {
   return PRODUCT_NAME_TRANSLATIONS[lang]?.[product.id] || translateDuration(product.name, lang);
 };
 
-const calculateSplitAmounts = (totalCents, count, firstAmountCents = null) => {
-  const remainingCents = firstAmountCents === null ? totalCents : totalCents - firstAmountCents;
-  const remainingLinks = firstAmountCents === null ? count : count - 1;
-  if (remainingLinks < 1 || remainingCents < remainingLinks) return [];
-  const base = Math.floor(remainingCents / remainingLinks);
-  const extra = remainingCents % remainingLinks;
-  const amounts = Array.from({ length: remainingLinks }, (_, index) => base + (index < extra ? 1 : 0));
-  return firstAmountCents === null ? amounts : [firstAmountCents, ...amounts];
+const calculateSplitAmounts = (totalCents, count) => {
+  if (count < 1 || totalCents < count) return [];
+  const base = Math.floor(totalCents / count);
+  const extra = totalCents % count;
+  return Array.from({ length: count }, (_, index) => base + (index < extra ? 1 : 0));
 };
 
 const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
@@ -217,8 +214,8 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
   const [splitPaymentLinks, setSplitPaymentLinks] = useState([]);
   const [splitCreatingPart, setSplitCreatingPart] = useState(null);
   const [splitCount, setSplitCount] = useState(2);
-  const [customFirstPayment, setCustomFirstPayment] = useState(false);
-  const [firstPaymentAmount, setFirstPaymentAmount] = useState('');
+  const [customSplitPayments, setCustomSplitPayments] = useState(false);
+  const [customSplitAmounts, setCustomSplitAmounts] = useState([]);
   const [manualPaymentConfirm, setManualPaymentConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedInvoice, setCopiedInvoice] = useState(false);
@@ -305,11 +302,14 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
   const biweekly = paymentType === 'installment' ? (totalWithFee / 4).toFixed(2) : null;
   const sixMonth = paymentType === 'installment' ? (totalWithFee / 6).toFixed(2) : null;
   const totalCents = Math.round(totalWithFee * 100);
-  const firstAmountCents = customFirstPayment && firstPaymentAmount !== '' ? Math.round(Number(firstPaymentAmount) * 100) : null;
-  const splitAmountCents = calculateSplitAmounts(totalCents, splitCount, firstAmountCents);
+  const equalSplitAmountCents = calculateSplitAmounts(totalCents, splitCount);
+  const customSplitAmountCents = customSplitAmounts.map(amount => Math.round(Number(amount) * 100));
+  const splitAmountCents = customSplitPayments ? customSplitAmountCents : equalSplitAmountCents;
   const splitAmounts = splitAmountCents.map(amount => amount / 100);
-  const splitConfigurationValid = !customFirstPayment || (
-    Number.isSafeInteger(firstAmountCents) && firstAmountCents > 0 && firstAmountCents <= totalCents - (splitCount - 1)
+  const splitConfigurationValid = !customSplitPayments || (
+    customSplitAmounts.length === splitCount &&
+    customSplitAmountCents.every(amount => Number.isSafeInteger(amount) && amount > 0) &&
+    customSplitAmountCents.reduce((sum, amount) => sum + amount, 0) === totalCents
   );
 
   const handleConfirm = async () => {
@@ -375,12 +375,18 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
       };
 
       if (splitPayment) {
-        if (!splitConfigurationValid) throw new Error('Enter a valid first payment that leaves at least $0.01 for every remaining link.');
+        if (!splitConfigurationValid) throw new Error('Enter valid amounts for every link that add up to the order total.');
         const splitGroup = `split_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
         const urls = [];
         for (let part = 1; part <= splitCount; part += 1) {
           setSplitCreatingPart(part);
-          const url = await createLink({ splitPayment: true, splitPart: part, splitCount, firstPaymentAmount: customFirstPayment ? firstPaymentAmount : null, splitGroup });
+          const url = await createLink({
+            splitPayment: true,
+            splitPart: part,
+            splitCount,
+            splitAmounts: customSplitPayments ? customSplitAmounts : null,
+            splitGroup,
+          });
           urls.push(url);
           setSplitPaymentLinks([...urls]);
         }
@@ -745,28 +751,46 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
               <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--glass-border)', display: 'grid', gap: '0.85rem' }}>
                 <label style={{ display: 'grid', gap: '5px', fontSize: '0.78rem', fontWeight: '700' }}>
                   Number of payment links
-                  <select value={splitCount} onChange={(event) => setSplitCount(Number(event.target.value))} style={{ padding: '0.7rem', borderRadius: '10px', border: '1px solid var(--glass-border)', background: 'white', fontSize: '0.85rem' }}>
+                  <select value={splitCount} onChange={(event) => {
+                    const count = Number(event.target.value);
+                    setSplitCount(count);
+                    if (customSplitPayments) {
+                      setCustomSplitAmounts(calculateSplitAmounts(totalCents, count).map(amount => (amount / 100).toFixed(2)));
+                    }
+                  }} style={{ padding: '0.7rem', borderRadius: '10px', border: '1px solid var(--glass-border)', background: 'white', fontSize: '0.85rem' }}>
                     {[2, 3, 4, 5].map(count => <option key={count} value={count}>Split into {count} links</option>)}
                   </select>
                 </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '9px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '700' }}>
-                  <input type="checkbox" checked={customFirstPayment} onChange={(event) => setCustomFirstPayment(event.target.checked)} style={{ accentColor: 'var(--primary)' }} />
-                  Set a custom amount for the first link
+                  <input type="checkbox" checked={customSplitPayments} onChange={(event) => {
+                    const enabled = event.target.checked;
+                    setCustomSplitPayments(enabled);
+                    if (enabled) setCustomSplitAmounts(equalSplitAmountCents.map(amount => (amount / 100).toFixed(2)));
+                  }} style={{ accentColor: 'var(--primary)' }} />
+                  Set custom amounts for each link
                 </label>
-                {customFirstPayment && (
-                  <label style={{ display: 'grid', gap: '5px', fontSize: '0.78rem', fontWeight: '700' }}>
-                    First payment amount
-                    <div style={{ display: 'flex', alignItems: 'center', background: 'white', border: `1px solid ${splitConfigurationValid ? 'var(--glass-border)' : '#dc2626'}`, borderRadius: '10px', paddingLeft: '0.75rem' }}>
-                      <span>$</span>
-                      <input type="number" min="0.01" step="0.01" value={firstPaymentAmount} onChange={(event) => setFirstPaymentAmount(event.target.value)} placeholder="350.00" style={{ width: '100%', padding: '0.7rem', border: 'none', outline: 'none', background: 'transparent' }} />
-                    </div>
-                  </label>
+                {customSplitPayments && (
+                  <div style={{ display: 'grid', gap: '0.65rem' }}>
+                    {Array.from({ length: splitCount }, (_, index) => (
+                      <label key={index} style={{ display: 'grid', gap: '5px', fontSize: '0.78rem', fontWeight: '700' }}>
+                        Link {index + 1} amount
+                        <div style={{ display: 'flex', alignItems: 'center', background: 'white', border: `1px solid ${splitConfigurationValid ? 'var(--glass-border)' : '#dc2626'}`, borderRadius: '10px', paddingLeft: '0.75rem' }}>
+                          <span>$</span>
+                          <input type="number" min="0.01" step="0.01" value={customSplitAmounts[index] ?? ''} onChange={(event) => {
+                            const amounts = [...customSplitAmounts];
+                            amounts[index] = event.target.value;
+                            setCustomSplitAmounts(amounts);
+                          }} placeholder="0.00" style={{ width: '100%', padding: '0.7rem', border: 'none', outline: 'none', background: 'transparent' }} />
+                        </div>
+                      </label>
+                    ))}
+                  </div>
                 )}
                 {splitConfigurationValid && splitAmounts.length === splitCount ? (
                   <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', lineHeight: '1.5' }}>
                     {splitAmounts.map((amount, index) => <span key={index} style={{ display: 'inline-block', marginRight: '12px' }}>Link {index + 1}: <b>${amount.toFixed(2)}</b></span>)}
                   </div>
-                ) : customFirstPayment && <div style={{ color: '#dc2626', fontSize: '0.78rem' }}>Enter a first amount below the total and leave at least $0.01 for each remaining link.</div>}
+                ) : customSplitPayments && <div style={{ color: '#dc2626', fontSize: '0.78rem' }}>Every amount must be at least $0.01 and the links must total exactly ${totalWithFee.toFixed(2)}.</div>}
               </div>
             )}
           </div>

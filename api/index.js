@@ -131,7 +131,7 @@ app.post('/api/create-payment-link', async (req, res) => {
       throw new Error('Stripe is not configured. Please add STRIPE_SECRET_KEY to environment variables.');
     }
 
-    const { products, paymentType, totalWithFee, feeAmount, splitPayment, splitPart, splitCount, firstPaymentAmount, splitGroup } = req.body;
+    const { products, paymentType, totalWithFee, feeAmount, splitPayment, splitPart, splitCount, splitAmounts, splitGroup } = req.body;
 
     if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: 'No products provided' });
@@ -148,14 +148,20 @@ app.post('/api/create-payment-link', async (req, res) => {
       const count = Number(splitCount);
       const part = Number(splitPart);
       if (!Number.isInteger(count) || count < 2 || count > 5 || !Number.isInteger(part) || part < 1 || part > count) return res.status(400).json({ error: 'Invalid split payment configuration.' });
-      const customFirstCents = firstPaymentAmount === null || firstPaymentAmount === undefined ? null : Math.round(Number(firstPaymentAmount) * 100);
-      const remainingCents = customFirstCents === null ? totalCents : totalCents - customFirstCents;
-      const remainingLinks = customFirstCents === null ? count : count - 1;
-      if ((customFirstCents !== null && (!Number.isSafeInteger(customFirstCents) || customFirstCents < 1)) || remainingCents < remainingLinks) return res.status(400).json({ error: 'Invalid first payment amount.' });
-      const baseAmount = Math.floor(remainingCents / remainingLinks);
-      const extraCents = remainingCents % remainingLinks;
-      const remainderAmounts = Array.from({ length: remainingLinks }, (_, index) => baseAmount + (index < extraCents ? 1 : 0));
-      const amounts = customFirstCents === null ? remainderAmounts : [customFirstCents, ...remainderAmounts];
+      let amounts;
+      if (splitAmounts !== null && splitAmounts !== undefined) {
+        if (!Array.isArray(splitAmounts) || splitAmounts.length !== count) {
+          return res.status(400).json({ error: 'Provide one amount for every payment link.' });
+        }
+        amounts = splitAmounts.map(value => Math.round(Number(value) * 100));
+        if (amounts.some(value => !Number.isSafeInteger(value) || value < 1) || amounts.reduce((sum, value) => sum + value, 0) !== totalCents) {
+          return res.status(400).json({ error: 'Split amounts must be at least $0.01 each and add up to the order total.' });
+        }
+      } else {
+        const baseAmount = Math.floor(totalCents / count);
+        const extraCents = totalCents % count;
+        amounts = Array.from({ length: count }, (_, index) => baseAmount + (index < extraCents ? 1 : 0));
+      }
       const amount = amounts[part - 1];
       const config = {
         line_items: [{ price_data: { currency: 'usd', unit_amount: amount, product_data: { name: `Dharma order - Part ${part} of ${count}`, metadata: { category: 'split_payment', split_part: String(part) } } }, quantity: 1 }],
