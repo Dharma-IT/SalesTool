@@ -80,7 +80,7 @@ app.get('/api/sheet-links', async (req, res) => {
     // Split into rows (handle both \r\n and \n)
     const rows = csv.split(/\r?\n/).map(r => parseCSVRow(r));
 
-    // Left table (PRX Pharmacy): col2 = LINK NAME, col3 = CREATED LINKS
+    // Left table (current product links): col2 = LINK NAME, col3 = CREATED LINKS
     // Right table (Absolute): col7 = LINK TAGS, col8 = CREATED LINKS
     // Row 0 = domain header, Row 1 = column headers, Rows 2+ = data
     const links = {};
@@ -92,13 +92,13 @@ app.get('/api/sheet-links', async (req, res) => {
       // Skip legacy/current provider separator rows.
       if (row[0] === 'STRIVE' || row[0] === 'PRX') continue;
 
-      // Left (PRX Pharmacy) table
-      const prxName = row[2];
-      const prxLink = row[3];
-      const prxTag = row[0];
-      if (prxName && prxLink && prxLink.startsWith('http')) {
-        if (!links[prxName]) links[prxName] = { displayName: prxTag };
-        links[prxName].prxLink = prxLink;
+      // Current product link, keyed by the sheet identifier (for example Sema1mg).
+      const productName = row[2];
+      const productLink = row[3];
+      const productTag = row[0];
+      if (productName && productLink && productLink.startsWith('http')) {
+        if (!links[productName]) links[productName] = { displayName: productTag };
+        links[productName].productLink = productLink;
       }
 
       // Right (Absolute) table
