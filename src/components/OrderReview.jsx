@@ -303,14 +303,31 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
   const sixMonth = paymentType === 'installment' ? (totalWithFee / 6).toFixed(2) : null;
   const totalCents = Math.round(totalWithFee * 100);
   const equalSplitAmountCents = calculateSplitAmounts(totalCents, splitCount);
-  const customSplitAmountCents = customSplitAmounts.map(amount => Math.round(Number(amount) * 100));
+  const customSplitAmountCents = customSplitAmounts.map(amount => amount === '' ? null : Math.round(Number(amount) * 100));
+  const allocatedSplitCents = customSplitAmountCents.reduce((sum, amount) => sum + (Number.isSafeInteger(amount) ? amount : 0), 0);
+  const remainingSplitCents = totalCents - allocatedSplitCents;
+  const unallocatedSplitCount = customSplitAmounts.filter(amount => amount === '').length;
   const splitAmountCents = customSplitPayments ? customSplitAmountCents : equalSplitAmountCents;
-  const splitAmounts = splitAmountCents.map(amount => amount / 100);
+  const splitAmounts = splitAmountCents.map(amount => (amount ?? 0) / 100);
   const splitConfigurationValid = !customSplitPayments || (
     customSplitAmounts.length === splitCount &&
     customSplitAmountCents.every(amount => Number.isSafeInteger(amount) && amount > 0) &&
     customSplitAmountCents.reduce((sum, amount) => sum + amount, 0) === totalCents
   );
+
+  const splitRemainingEvenly = () => {
+    const blankIndexes = customSplitAmounts
+      .map((amount, index) => amount === '' ? index : -1)
+      .filter(index => index !== -1);
+    if (blankIndexes.length === 0 || remainingSplitCents < blankIndexes.length) return;
+
+    const dividedAmounts = calculateSplitAmounts(remainingSplitCents, blankIndexes.length);
+    const amounts = [...customSplitAmounts];
+    blankIndexes.forEach((amountIndex, index) => {
+      amounts[amountIndex] = (dividedAmounts[index] / 100).toFixed(2);
+    });
+    setCustomSplitAmounts(amounts);
+  };
 
   const handleConfirm = async () => {
     if (paymentType === 'zelle_venmo_cashapp') {
@@ -755,7 +772,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
                     const count = Number(event.target.value);
                     setSplitCount(count);
                     if (customSplitPayments) {
-                      setCustomSplitAmounts(calculateSplitAmounts(totalCents, count).map(amount => (amount / 100).toFixed(2)));
+                      setCustomSplitAmounts(current => Array.from({ length: count }, (_, index) => current[index] ?? ''));
                     }
                   }} style={{ padding: '0.7rem', borderRadius: '10px', border: '1px solid var(--glass-border)', background: 'white', fontSize: '0.85rem' }}>
                     {[2, 3, 4, 5].map(count => <option key={count} value={count}>Split into {count} links</option>)}
@@ -765,7 +782,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
                   <input type="checkbox" checked={customSplitPayments} onChange={(event) => {
                     const enabled = event.target.checked;
                     setCustomSplitPayments(enabled);
-                    if (enabled) setCustomSplitAmounts(equalSplitAmountCents.map(amount => (amount / 100).toFixed(2)));
+                    if (enabled) setCustomSplitAmounts(Array(splitCount).fill(''));
                   }} style={{ accentColor: 'var(--primary)' }} />
                   Set custom amounts for each link
                 </label>
@@ -784,13 +801,26 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
                         </div>
                       </label>
                     ))}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
+                      <span style={{ color: remainingSplitCents < 0 ? '#dc2626' : 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '700' }}>
+                        {remainingSplitCents < 0 ? 'Over allocated' : 'Amount left'}: <b>${Math.abs(remainingSplitCents / 100).toFixed(2)}</b>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={splitRemainingEvenly}
+                        disabled={unallocatedSplitCount === 0 || remainingSplitCents < unallocatedSplitCount}
+                        style={{ padding: '0.55rem 0.8rem', borderRadius: '9px', border: '1px solid var(--glass-border)', background: unallocatedSplitCount > 0 && remainingSplitCents >= unallocatedSplitCount ? 'rgba(212,175,55,0.12)' : 'rgba(0,0,0,0.04)', color: unallocatedSplitCount > 0 && remainingSplitCents >= unallocatedSplitCount ? 'var(--primary)' : 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '800', cursor: unallocatedSplitCount > 0 && remainingSplitCents >= unallocatedSplitCount ? 'pointer' : 'not-allowed' }}
+                      >
+                        Split remaining evenly ({unallocatedSplitCount})
+                      </button>
+                    </div>
                   </div>
                 )}
                 {splitConfigurationValid && splitAmounts.length === splitCount ? (
                   <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', lineHeight: '1.5' }}>
                     {splitAmounts.map((amount, index) => <span key={index} style={{ display: 'inline-block', marginRight: '12px' }}>Link {index + 1}: <b>${amount.toFixed(2)}</b></span>)}
                   </div>
-                ) : customSplitPayments && <div style={{ color: '#dc2626', fontSize: '0.78rem' }}>Every amount must be at least $0.01 and the links must total exactly ${totalWithFee.toFixed(2)}.</div>}
+                ) : customSplitPayments && <div style={{ color: '#dc2626', fontSize: '0.78rem' }}>Enter each amount manually or leave some blank and split the remaining balance evenly. The links must total exactly ${totalWithFee.toFixed(2)}.</div>}
               </div>
             )}
           </div>
