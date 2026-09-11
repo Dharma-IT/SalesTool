@@ -315,20 +315,20 @@ export const PRODUCTS = [
   // ============================================================
   // SEMAGLUTIDE (GLP-1, state + BMI restricted)
   // ============================================================
-  { id: 'sema_micro_2mo', type: 'glp', group: 'Semaglutide', category: 'medicine', name: 'Microdose Semaglutide - 2 Months', price: 298.00, usage: 'Up Front', allowedStates: SEMAGLUTIDE_STATES, requirement: 'MICRODOSE' },
-  { id: 'sema_starter_3mo', type: 'glp', group: 'Semaglutide', category: 'medicine', name: 'Starter Package: Semaglutide 3 Months', price: 597.00, usage: 'Up Front', allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
-  { id: 'sema_starter_6mo', type: 'glp', group: 'Semaglutide', category: 'medicine', name: 'Starter Package: Semaglutide 6 Months', price: 1014.00, usage: 'Up Front', allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
-  { id: 'sema_starter_12mo', type: 'glp', group: 'Semaglutide', category: 'medicine', name: 'Starter Package: Semaglutide 12 Months', price: 1788.00, usage: 'Up Front', allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
-  { id: 'sema10_1mo', type: 'glp', group: 'Semaglutide', category: 'medicine', name: 'Single Purchase: Semaglutide 10mg - 1 Month', price: 399.00, usage: 'Up Front', allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'sema_micro_2mo', type: 'glp', group: 'Semaglutide', category: 'medicine', name: 'Compounded Semaglutide Microdose - 8 weeks', price: 499.00, usage: 'Up Front', allowedStates: SEMAGLUTIDE_STATES, requirement: 'MICRODOSE' },
+  { id: 'sema_starter_3mo', type: 'glp', group: 'Semaglutide', category: 'medicine', name: 'Compounded Semaglutide 1mg - 4 weeks', price: 499.00, usage: 'Up Front', allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'sema_starter_6mo', type: 'glp', group: 'Semaglutide', category: 'medicine', name: 'Compounded Semaglutide 3mg - 8 weeks', price: 599.00, usage: 'Up Front', allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'sema_starter_12mo', type: 'glp', group: 'Semaglutide', category: 'medicine', name: 'Compounded Semaglutide 7mg - 12 weeks', price: 799.00, usage: 'Up Front', allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'sema10_1mo', type: 'glp', group: 'Semaglutide', category: 'medicine', name: 'Compounded Semaglutide 10mg - Advanced Dosing', price: 599.00, usage: 'Up Front', allowedStates: SEMAGLUTIDE_STATES, requirement: 'BMI25TO29_MED' },
 
   // ============================================================
   // TIRZEPATIDE (GLP-1, state + BMI restricted)
   // ============================================================
-  { id: 'tirz_micro_2mo', type: 'glp', group: 'Tirzepatide', category: 'medicine', name: 'Microdose Tirzepatide - 2 Months', price: 470.00, usage: 'Up Front', allowedStates: TIRZEPATIDE_STATES, requirement: 'MICRODOSE' },
-  { id: 'tirz_starter_3mo', type: 'glp', group: 'Tirzepatide', category: 'medicine', name: 'Starter Package: Tirzepatide 3 Months', price: 897.00, usage: 'Up Front', allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
-  { id: 'tirz_starter_6mo', type: 'glp', group: 'Tirzepatide', category: 'medicine', name: 'Starter Package: Tirzepatide 6 Months', price: 1494.00, usage: 'Up Front', allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
-  { id: 'tirz_starter_12mo', type: 'glp', group: 'Tirzepatide', category: 'medicine', name: 'Starter Package: Tirzepatide 12 Months', price: 2820.00, usage: 'Up Front', allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
-  { id: 'tirz60_1mo', type: 'glp', group: 'Tirzepatide', category: 'medicine', name: 'Single Purchase: Tirzepatide 60mg - 1 Month', price: 599.00, usage: 'Up Front', allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'tirz_micro_2mo', type: 'glp', group: 'Tirzepatide', category: 'medicine', name: 'Compounded Tirzepatide Microdose - 8 weeks', price: 599.00, usage: 'Up Front', allowedStates: TIRZEPATIDE_STATES, requirement: 'MICRODOSE' },
+  { id: 'tirz_starter_3mo', type: 'glp', group: 'Tirzepatide', category: 'medicine', name: 'Compounded Tirzepatide 8mg - 4 weeks', price: 599.00, usage: 'Up Front', allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'tirz_starter_6mo', type: 'glp', group: 'Tirzepatide', category: 'medicine', name: 'Compounded Tirzepatide 24mg - 8 weeks', price: 799.00, usage: 'Up Front', allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'tirz_starter_12mo', type: 'glp', group: 'Tirzepatide', category: 'medicine', name: 'Compounded Tirzepatide 52mg - 12 weeks', price: 999.00, usage: 'Up Front', allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
+  { id: 'tirz60_1mo', type: 'glp', group: 'Tirzepatide', category: 'medicine', name: 'Compounded Tirzepatide 60mg - Advanced Dosing', price: 799.00, usage: 'Up Front', allowedStates: TIRZEPATIDE_STATES, requirement: 'BMI25TO29_MED' },
 
   // ============================================================
   // STANDALONE MEDICAL / INJECTABLES (state restricted, NO BMI req)
