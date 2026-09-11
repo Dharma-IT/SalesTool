@@ -54,6 +54,131 @@ const DURATION_TRANSLATIONS = {
   }
 };
 
+const PRODUCT_NAME_TRANSLATIONS = {
+  es: {
+    sema_micro_2mo: 'Microdosis de Semaglutida - 2 Meses',
+    sema_starter_3mo: 'Paquete Inicial: Semaglutida 3 Meses',
+    sema_starter_6mo: 'Paquete Inicial: Semaglutida 6 Meses',
+    sema_starter_12mo: 'Paquete Inicial: Semaglutida 12 Meses',
+    sema10_1mo: 'Compra Única: Semaglutida 10 mg - 1 Mes',
+    tirz_micro_2mo: 'Microdosis de Tirzepatida - 2 Meses',
+    tirz_starter_3mo: 'Paquete Inicial: Tirzepatida 3 Meses',
+    tirz_starter_6mo: 'Paquete Inicial: Tirzepatida 6 Meses',
+    tirz_starter_12mo: 'Paquete Inicial: Tirzepatida 12 Meses',
+    tirz60_1mo: 'Compra Única: Tirzepatida 60 mg - 1 Mes',
+    lipo: 'Lipo-Mino Un Mes',
+    lipo_3mo: 'Lipo-Mino 3 Meses',
+    nad: 'NAD+ Un Mes',
+    nad_3mo: 'NAD+ 3 Meses',
+    ghkcu_3mo: 'GHK-Cu 3 Meses',
+    ghkcu_1mo: 'GHK-Cu Un Mes',
+    sermorelin_2mo: 'Sermorelina Dos Meses',
+    sermorelin_1mo: 'Sermorelina Un Mes',
+    glutathione_4mo: 'Glutatión Cuatro Meses',
+    glutathione_2mo: 'Glutatión Dos Meses',
+    nc12: 'Consulta de Nutrición 12 Meses',
+    nc6: 'Consulta de Nutrición 6 Meses',
+    nc3: 'Consulta de Nutrición 3 Meses',
+    nc_not_client: 'Consulta de Nutrición 1 Mes - Clientes sin GLP-1',
+    nc: 'Consulta de Nutrición 1 Mes',
+    beauty_boost: 'Impulso de Belleza - Esenciales para Cabello, Piel y Uñas',
+    bloat_away: 'Adiós Hinchazón - Probiótico de 40 Mil Millones con Prebióticos',
+    bone_heart: 'Apoyo para Huesos y Corazón',
+    brain_focus: 'Fórmula para Cerebro y Concentración',
+    multivitamin: 'Multivitamínico Completo',
+    detox_now: 'Desintoxícate Ahora - Refresca, Limpia y Brilla',
+    diet_drops: 'Gotas Dietéticas Ultra',
+    gut_boost: 'Refuerzo Intestinal Pro y Digestión Suave',
+    maca_plus: 'Ámame Ahora - Maca Plus',
+    omega3: 'Omega-3 EPA 180 mg + DHA 120 mg',
+    vitamin_d3: 'Vitamina D3 2,000 UI',
+    magnesium: 'Glicinato de Magnesio',
+    energy_strips: 'Tiras de Energía',
+    glutamine: 'L-Glutamina en Polvo',
+    sleep_strips: 'Tiras para Dormir',
+    hydraglow_peach_mango: 'Hydraglow en Polvo (Durazno y Mango)',
+    hydraglow_lychee: 'Hydraglow en Polvo (Lichi)',
+    hydraglow_lemonade: 'Hydraglow en Polvo (Limonada)',
+    apple_cider_vinegar: 'Cápsulas de Vinagre de Sidra de Manzana',
+    berberine: 'Berberina+ y Pierde Peso',
+    glp1_support: 'Apoyo GLP-1 | Fórmula Diaria Metabólica, Intestinal y de Micronutrientes',
+    colon_cleanse: 'Limpieza Suave de Colon',
+    colostrum: 'Cápsulas de Calostro',
+    creatine: 'Monohidrato de Creatina',
+    fat_burner: 'Quemador de Grasa y Control del Apetito',
+    collagen_choc: 'Chocolate - Péptidos de Colágeno en Polvo de Ganado Alimentado con Pasto',
+    nad_antiaging: 'NAD+ Energía Celular y Antienvejecimiento',
+    collagen_peptides: 'Sin Sabor - Péptidos de Colágeno Hidrolizado de Ganado Alimentado con Pasto',
+    collagen_vanilla: 'Vainilla - Crema en Polvo con Péptidos de Colágeno de Ganado Alimentado con Pasto',
+    whey_choc: 'Chocolate - Aislado Avanzado de Proteína de Suero 100%',
+    whey_vanilla: 'Vainilla - Aislado Avanzado de Proteína de Suero 100%',
+    shipping: 'Envío',
+    slimboost: 'Impulso Adelgazante',
+    detox_tea: 'Té Desintoxicante',
+  },
+  pt: {
+    sema_micro_2mo: 'Microdose de Semaglutida - 2 Meses',
+    sema_starter_3mo: 'Pacote Inicial: Semaglutida 3 Meses',
+    sema_starter_6mo: 'Pacote Inicial: Semaglutida 6 Meses',
+    sema_starter_12mo: 'Pacote Inicial: Semaglutida 12 Meses',
+    sema10_1mo: 'Compra Única: Semaglutida 10 mg - 1 Mês',
+    tirz_micro_2mo: 'Microdose de Tirzepatida - 2 Meses',
+    tirz_starter_3mo: 'Pacote Inicial: Tirzepatida 3 Meses',
+    tirz_starter_6mo: 'Pacote Inicial: Tirzepatida 6 Meses',
+    tirz_starter_12mo: 'Pacote Inicial: Tirzepatida 12 Meses',
+    tirz60_1mo: 'Compra Única: Tirzepatida 60 mg - 1 Mês',
+    lipo: 'Lipo-Mino Um Mês',
+    lipo_3mo: 'Lipo-Mino 3 Meses',
+    nad: 'NAD+ Um Mês',
+    nad_3mo: 'NAD+ 3 Meses',
+    ghkcu_3mo: 'GHK-Cu 3 Meses',
+    ghkcu_1mo: 'GHK-Cu Um Mês',
+    sermorelin_2mo: 'Sermorelina Dois Meses',
+    sermorelin_1mo: 'Sermorelina Um Mês',
+    glutathione_4mo: 'Glutationa Quatro Meses',
+    glutathione_2mo: 'Glutationa Dois Meses',
+    nc12: 'Consulta Nutricional 12 Meses',
+    nc6: 'Consulta Nutricional 6 Meses',
+    nc3: 'Consulta Nutricional 3 Meses',
+    nc_not_client: 'Consulta Nutricional 1 Mês - Clientes sem GLP-1',
+    nc: 'Consulta Nutricional 1 Mês',
+    beauty_boost: 'Impulso de Beleza - Essenciais para Cabelo, Pele e Unhas',
+    bloat_away: 'Livre do Inchaço - Probiótico de 40 Bilhões com Prebióticos',
+    bone_heart: 'Suporte para Ossos e Coração',
+    brain_focus: 'Fórmula para Cérebro e Foco',
+    multivitamin: 'Multivitamínico Completo',
+    detox_now: 'Desintoxique Agora - Refresque, Limpe e Brilhe',
+    diet_drops: 'Gotas Dietéticas Ultra',
+    gut_boost: 'Reforço Intestinal Pro e Digestão Suave',
+    maca_plus: 'Ame-me Agora - Maca Plus',
+    omega3: 'Ômega-3 EPA 180 mg + DHA 120 mg',
+    vitamin_d3: 'Vitamina D3 2.000 UI',
+    magnesium: 'Glicinato de Magnésio',
+    energy_strips: 'Tiras de Energia',
+    glutamine: 'L-Glutamina em Pó',
+    sleep_strips: 'Tiras para Dormir',
+    hydraglow_peach_mango: 'Hydraglow em Pó (Pêssego e Manga)',
+    hydraglow_lychee: 'Hydraglow em Pó (Lichia)',
+    hydraglow_lemonade: 'Hydraglow em Pó (Limonada)',
+    apple_cider_vinegar: 'Cápsulas de Vinagre de Maçã',
+    berberine: 'Berberina+ e Perda de Peso',
+    glp1_support: 'Suporte GLP-1 | Fórmula Diária Metabólica, Intestinal e de Micronutrientes',
+    colon_cleanse: 'Limpeza Suave do Cólon',
+    colostrum: 'Cápsulas de Colostro',
+    creatine: 'Monohidrato de Creatina',
+    fat_burner: 'Queimador de Gordura e Controle do Apetite',
+    collagen_choc: 'Chocolate - Peptídeos de Colágeno em Pó de Gado Alimentado com Capim',
+    nad_antiaging: 'NAD+ Energia Celular e Antienvelhecimento',
+    collagen_peptides: 'Sem Sabor - Peptídeos de Colágeno Hidrolisado de Gado Alimentado com Capim',
+    collagen_vanilla: 'Baunilha - Creme em Pó com Peptídeos de Colágeno de Gado Alimentado com Capim',
+    whey_choc: 'Chocolate - Isolado Avançado de Proteína do Soro 100%',
+    whey_vanilla: 'Baunilha - Isolado Avançado de Proteína do Soro 100%',
+    shipping: 'Frete',
+    slimboost: 'Impulso Emagrecedor',
+    detox_tea: 'Chá Detox',
+  },
+};
+
 const translateDuration = (productName, lang) => {
   if (lang === 'en') return productName;
 
@@ -67,6 +192,11 @@ const translateDuration = (productName, lang) => {
   });
 
   return translated;
+};
+
+const translateProductName = (product, lang) => {
+  if (lang === 'en') return product.name;
+  return PRODUCT_NAME_TRANSLATIONS[lang]?.[product.id] || translateDuration(product.name, lang);
 };
 
 const calculateSplitAmounts = (totalCents, count, firstAmountCents = null) => {
@@ -274,7 +404,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
     lines.push('');
     selectedProducts.forEach(p => {
       const emoji = getProductEmoji(p);
-      lines.push(`${emoji} ${translateDuration(p.name, payLaterLang)}`);
+      lines.push(`${emoji} ${translateProductName(p, payLaterLang)}`);
     });
     lines.push('');
     lines.push(`🤝 ${t.customerSupport}`);
