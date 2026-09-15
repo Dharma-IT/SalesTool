@@ -4,9 +4,9 @@ import Stripe from 'stripe';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
-import { getShopifyPriceSync } from '../api/shopify-prices.js';
-import { getSucceededStripePayments } from '../api/stripe-payments.js';
-import { requireAuthenticatedUser } from '../api/auth.js';
+import { getShopifyPriceSync } from '../api/_shopify-prices.js';
+import { getSucceededStripePayments } from '../api/_stripe-payments.js';
+import { requireAuthenticatedUser } from '../api/_auth.js';
 
 // Load .env.local explicitly (dotenv only loads .env by default)
 const __filename = fileURLToPath(import.meta.url);

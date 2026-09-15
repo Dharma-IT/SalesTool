@@ -4,9 +4,9 @@ import Stripe from 'stripe';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
-import { getShopifyPriceSync } from './shopify-prices.js';
-import { getSucceededStripePayments } from './stripe-payments.js';
-import { requireAuthenticatedUser } from './auth.js';
+import { getShopifyPriceSync } from './_shopify-prices.js';
+import { getSucceededStripePayments } from './_stripe-payments.js';
+import { requireAuthenticatedUser } from './_auth.js';
 
 // Load .env only in local development
 // Note: In Vercel, use Environment Variables in the dashboard instead
