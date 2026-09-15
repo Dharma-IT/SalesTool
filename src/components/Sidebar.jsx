@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, User, Target, ShoppingCart, ClipboardList, Check, UserCircle, X } from 'lucide-react';
+import { MapPin, User, Target, ShoppingCart, ClipboardList, Check, UserCircle, CreditCard, X } from 'lucide-react';
 const logo1 = '/logo1.png';
 
 const stepIcons = {
@@ -10,7 +10,7 @@ const stepIcons = {
   5: ClipboardList,
 };
 
-const Sidebar = ({ activeStep, maxStep, isOpen, onClose, onStepClick, onSupplementsFaqOpen }) => {
+const Sidebar = ({ activeStep, maxStep, isOpen, onClose, onStepClick, onSupplementsFaqOpen, onStripeDashboardOpen }) => {
   const steps = [
     { num: 1, label: 'State Selection', active: activeStep === 1, done: activeStep > 1 },
     { num: 2, label: 'Biometrics', active: activeStep === 2, done: activeStep > 2 },
@@ -103,17 +103,17 @@ const Sidebar = ({ activeStep, maxStep, isOpen, onClose, onStepClick, onSuppleme
         })}
       </div>
 
-      <div style={{
-        marginTop: 'auto',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '1.25rem',
-        background: 'rgba(255, 255, 255, 0.3)',
-        borderRadius: '20px',
-        border: '1px solid rgba(20, 83, 45, 0.3)',
-        backdropFilter: 'blur(10px)'
-      }}>
+      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '1.25rem',
+          background: 'rgba(255, 255, 255, 0.3)',
+          borderRadius: '20px',
+          border: '1px solid rgba(20, 83, 45, 0.3)',
+          backdropFilter: 'blur(10px)'
+        }}>
         <button
           type="button"
           onClick={onSupplementsFaqOpen}
@@ -147,10 +147,26 @@ const Sidebar = ({ activeStep, maxStep, isOpen, onClose, onStepClick, onSuppleme
         >
           <UserCircle size={22} />
         </button>
-        <div>
-          <div style={{ fontWeight: '700', fontSize: '0.875rem', color: 'var(--text-main)' }}>Sales Agent</div>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '600' }}>Sales Discovery</div>
+          <div>
+            <div style={{ fontWeight: '700', fontSize: '0.875rem', color: 'var(--text-main)' }}>Sales Agent</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '600' }}>Sales Discovery</div>
+          </div>
         </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            onStripeDashboardOpen?.();
+            onClose();
+          }}
+          className="stripe-dashboard-button"
+        >
+          <span className="stripe-dashboard-icon"><CreditCard size={22} /></span>
+          <span>
+            <span className="stripe-dashboard-title">Stripe Dashboard</span>
+            <span className="stripe-dashboard-subtitle">Payments Overview</span>
+          </span>
+        </button>
       </div>
     </aside>
   );

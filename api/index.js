@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import { getShopifyPriceSync } from './shopify-prices.js';
+import { getSucceededStripePayments } from './stripe-payments.js';
+import { requireAuthenticatedUser } from './auth.js';
 
 // Load .env only in local development
 // Note: In Vercel, use Environment Variables in the dashboard instead
@@ -46,6 +48,19 @@ app.get('/api/shopify-prices', async (req, res) => {
   } catch (error) {
     console.error('Shopify price sync error:', error.message);
     res.status(502).json({ error: error.message });
+  }
+});
+
+app.get('/api/stripe-payments', async (req, res) => {
+  try {
+    if (!stripe) return res.status(503).json({ error: 'Stripe is not configured.' });
+    await requireAuthenticatedUser(req);
+    const result = await getSucceededStripePayments(stripe, req.query.date);
+    res.set('Cache-Control', 'private, no-store');
+    res.json(result);
+  } catch (error) {
+    console.error('Stripe payment fetch error:', error.message);
+    res.status(error.statusCode || 502).json({ error: error.message });
   }
 });
 

@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import { getShopifyPriceSync } from '../api/shopify-prices.js';
+import { getSucceededStripePayments } from '../api/stripe-payments.js';
+import { requireAuthenticatedUser } from '../api/auth.js';
 
 // Load .env.local explicitly (dotenv only loads .env by default)
 const __filename = fileURLToPath(import.meta.url);
@@ -44,6 +46,18 @@ app.get('/api/shopify-prices', async (req, res) => {
   } catch (error) {
     console.error('Shopify price sync error:', error.message);
     res.status(502).json({ error: error.message });
+  }
+});
+
+app.get('/api/stripe-payments', async (req, res) => {
+  try {
+    await requireAuthenticatedUser(req);
+    const result = await getSucceededStripePayments(stripe, req.query.date);
+    res.set('Cache-Control', 'private, no-store');
+    res.json(result);
+  } catch (error) {
+    console.error('Stripe payment fetch error:', error.message);
+    res.status(error.statusCode || 502).json({ error: error.message });
   }
 });
 
