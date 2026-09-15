@@ -48,10 +48,16 @@ function Dashboard({ session }) {
       try {
         data = responseText ? JSON.parse(responseText) : {};
       } catch {
-        throw new Error('The local API returned an invalid response. Restart it with npm run dev.');
+        const contentType = response.headers.get('content-type') || '';
+        const detail = response.status ? ` (HTTP ${response.status})` : '';
+        throw new Error(
+          contentType.includes('text/html')
+            ? `The payments API route returned the website instead of API data${detail}. Check the deployment's API routing.`
+            : `The payments API returned an invalid response${detail}.`
+        );
       }
       if (!responseText) {
-        throw new Error('The local API is not responding. Restart the app with npm run dev.');
+        throw new Error(`The payments API returned an empty response (HTTP ${response.status}).`);
       }
       if (!response.ok) throw new Error(data.error || 'Unable to fetch Stripe payments.');
       setStripePayments(data.payments || []);
