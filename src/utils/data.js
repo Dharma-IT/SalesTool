@@ -360,13 +360,15 @@ export const PRODUCTS = [
 
 
   // ============================================================
-  // NUTRITION CONSULTATIONS (ALL states, no restrictions)
+  // NUTRITION CONSULTATIONS
   // ============================================================
   { id: 'nc12', type: 'nutrition', category: 'service', name: 'Nutrition Consultation 12 months', price: 1379.16, allowedStates: 'ALL' },
   { id: 'nc6', type: 'nutrition', category: 'service', name: 'Nutrition Consultation 6 months', price: 799.86, allowedStates: 'ALL' },
   { id: 'nc3', type: 'nutrition', category: 'service', name: 'Nutrition Consultation 3 months', price: 449.01, allowedStates: 'ALL' },
   { id: 'nc_not_client', type: 'nutrition', category: 'service', name: 'Nutrition Consultation 1 month - Non GLP-1 Clients', price: 250.00, allowedStates: 'ALL' },
-  { id: 'nc', type: 'nutrition', category: 'service', name: 'Nutrition Consultation 1 month', price: 199.00, allowedStates: 'ALL' },
+  // The discounted consultation is only for GLP-1 clients, so limit it to
+  // states where at least one GLP-1 product (Semaglutide) is available.
+  { id: 'nc', type: 'nutrition', category: 'service', name: 'Nutrition Consultation 1 month', price: 199.00, allowedStates: SEMAGLUTIDE_STATES },
 
   // ============================================================
   // SUPPLEMENTS (ALL states, always eligible)
