@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Pill, Leaf, Search, Package, Zap, Shield, Drople
 
 const ProductGrid = ({ products, selectedProducts, updateProductQuantity, selectedState, bmi, onBack }) => {
   const [activeTab, setActiveTab] = useState('nutrition');
-  const [priceSort, setPriceSort] = useState('lowToHigh');
+  const [priceSort, setPriceSort] = useState('highToLow');
   
   const filteredProducts = useMemo(() => {
     let filtered = products.filter(p => p.type === activeTab);
