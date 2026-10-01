@@ -40,7 +40,7 @@ const ProductGrid = ({ products, selectedProducts, updateProductQuantity, select
     { key: 'nad', label: 'NAD Products', Icon: Zap },
     { key: 'ghk', label: 'GHK Products', Icon: Shield },
     { key: 'lipomino', label: 'Lipomino Products', Icon: Droplets },
-    { key: 'glutathione', label: 'glutathione', Icon: Pill },
+    { key: 'glutathione', label: 'Glutathione', Icon: Pill },
     { key: 'sermorelin', label: 'Sermorelin', Icon: Pill },
     { key: 'supplement', label: 'Supplements', Icon: Package },
   ];
