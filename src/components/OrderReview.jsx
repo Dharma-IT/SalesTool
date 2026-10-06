@@ -423,7 +423,7 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
   const buildPayLaterMessage = (link) => {
     const t = PAYLATER_TRANSLATIONS[payLaterLang];
     const lines = [];
-    lines.push('📸 Instagram: @dharma.clinic');
+    lines.push('📸 Instagram: @dharmanutritionclinic');
     lines.push('');
     selectedProducts.forEach(p => {
       const emoji = getProductEmoji(p);
