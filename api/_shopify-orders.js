@@ -37,24 +37,33 @@ export async function searchShopifyOrders(term, after) {
   const value = term.trim().replace(/^#/, '').replace(/[\\"]/g, '\\$&');
   const query = term.includes('@') ? `email:"${value}"` : `name:"${value}" OR customer:"${value}"`;
   const token = await getShopifyToken();
-  const response = await fetch(`https://${shopifyDomain()}/admin/api/${process.env.SHOPIFY_API_VERSION || '2026-07'}/graphql.json`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': token },
-    signal: AbortSignal.timeout(20000),
-    body: JSON.stringify({ query: `query SearchOrders($query: String!, $after: String) {
-      orders(first: 25, after: $after, query: $query, sortKey: CREATED_AT, reverse: true) {
-        nodes { id name createdAt email displayFinancialStatus displayFulfillmentStatus
-          customer { displayName }
-          totalPriceSet { shopMoney { amount currencyCode } }
+  async function fetchOrders(includeCustomer) {
+    const response = await fetch(`https://${shopifyDomain()}/admin/api/${process.env.SHOPIFY_API_VERSION || '2026-07'}/graphql.json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': token },
+      signal: AbortSignal.timeout(20000),
+      body: JSON.stringify({ query: `query SearchOrders($query: String!, $after: String) {
+        orders(first: 25, after: $after, query: $query, sortKey: CREATED_AT, reverse: true) {
+          nodes { id name createdAt email displayFinancialStatus displayFulfillmentStatus
+            ${includeCustomer ? 'customer { displayName }' : ''}
+            totalPriceSet { shopMoney { amount currencyCode } }
+          }
+          pageInfo { hasNextPage endCursor }
         }
-        pageInfo { hasNextPage endCursor }
-      }
-    }`, variables: { query, after: after || null } }),
-  });
-  if (response.status === 401) cachedToken = null;
-  if (!response.ok) throw new Error(`Shopify order request failed (${response.status}).`);
-  const payload = await response.json();
-  if (payload.errors?.length) throw new Error(payload.errors.map(error => error.message).join('; '));
-  if (!payload.data?.orders) throw new Error('Shopify returned an invalid orders response.');
-  return { orders: payload.data.orders.nodes, pageInfo: payload.data.orders.pageInfo };
+      }`, variables: { query, after: after || null } }),
+    });
+    if (response.status === 401) cachedToken = null;
+    if (!response.ok) throw new Error(`Shopify order request failed (${response.status}).`);
+    const payload = await response.json();
+    // Retry without the optional customer field when the app can read orders
+    // but has not been granted access to customer records.
+    if (includeCustomer && payload.errors?.length && payload.errors.every(error =>
+      error.extensions?.code === 'ACCESS_DENIED' &&
+      (error.path?.includes('customer') || /Access denied for customer field/i.test(error.message))
+    )) return fetchOrders(false);
+    if (payload.errors?.length) throw new Error(payload.errors.map(error => error.message).join('; '));
+    if (!payload.data?.orders) throw new Error('Shopify returned an invalid orders response.');
+    return { orders: payload.data.orders.nodes, pageInfo: payload.data.orders.pageInfo, customerDetailsAvailable: includeCustomer };
+  }
+  return fetchOrders(true);
 }
