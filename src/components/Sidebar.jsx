@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, User, Target, ShoppingCart, ClipboardList, Check, UserCircle, CreditCard, X } from 'lucide-react';
+import { MapPin, User, Target, ShoppingCart, ClipboardList, Check, UserCircle, CreditCard, Search, X } from 'lucide-react';
 const logo1 = '/logo1.png';
 
 const stepIcons = {
@@ -10,7 +10,7 @@ const stepIcons = {
   5: ClipboardList,
 };
 
-const Sidebar = ({ activeStep, maxStep, isOpen, onClose, onStepClick, onSupplementsFaqOpen, onStripeDashboardOpen }) => {
+const Sidebar = ({ activeStep, maxStep, isOpen, onClose, onStepClick, onSupplementsFaqOpen, onStripeDashboardOpen, onOrderSearchOpen }) => {
   const steps = [
     { num: 1, label: 'State Selection', active: activeStep === 1, done: activeStep > 1 },
     { num: 2, label: 'Biometrics', active: activeStep === 2, done: activeStep > 2 },
@@ -103,7 +103,7 @@ const Sidebar = ({ activeStep, maxStep, isOpen, onClose, onStepClick, onSuppleme
         })}
       </div>
 
-      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div style={{ marginTop: 'auto', paddingTop: '1.5rem', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -166,6 +166,10 @@ const Sidebar = ({ activeStep, maxStep, isOpen, onClose, onStepClick, onSuppleme
             <span className="stripe-dashboard-title">Stripe Dashboard</span>
             <span className="stripe-dashboard-subtitle">Payments Overview</span>
           </span>
+        </button>
+        <button type="button" className="stripe-dashboard-button" onClick={() => { onOrderSearchOpen?.(); onClose(); }}>
+          <span className="stripe-dashboard-icon"><Search size={22} /></span>
+          <span><span className="stripe-dashboard-title">Order Search</span><span className="stripe-dashboard-subtitle">Shopify Orders</span></span>
         </button>
       </div>
     </aside>

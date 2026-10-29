@@ -1,4 +1,5 @@
 /* global process */
+import { getShopifyToken } from './_shopify-orders.js';
 import { PRODUCTS } from '../src/utils/data.js';
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -68,7 +69,7 @@ function matchProduct(localProduct, candidates) {
 }
 
 async function fetchActiveShopifyProducts() {
-  const token = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
+  const token = await getShopifyToken();
   const domain = (process.env.SHOPIFY_STORE_DOMAIN || '').replace(/^https?:\/\//, '').replace(/\/+$/, '');
   const apiVersion = process.env.SHOPIFY_API_VERSION || '2026-07';
   if (!token || !domain) throw new Error('Shopify is not configured.');

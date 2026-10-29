@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import OrderSearchModal from './components/OrderSearchModal';
 import Sidebar from './components/Sidebar';
 import StateStep from './components/StateStep';
 import BiometricsStep from './components/BiometricsStep';
@@ -28,6 +29,7 @@ function Dashboard({ session }) {
   const [selectedState, setSelectedState] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSupplementsFaq, setShowSupplementsFaq] = useState(false);
+  const [showOrderSearch, setShowOrderSearch] = useState(false);
   const [showStripeDashboard, setShowStripeDashboard] = useState(false);
   const [stripeDate, setStripeDate] = useState(getEasternDate);
   const [stripeFetchedDate, setStripeFetchedDate] = useState('');
@@ -292,6 +294,7 @@ function Dashboard({ session }) {
                     setSidebarOpen(false);
                   }}
                   onStripeDashboardOpen={() => setShowStripeDashboard(true)}
+                  onOrderSearchOpen={() => setShowOrderSearch(true)}
                 />
                 <main className="main-content">
                   <header style={{ marginBottom: '3rem' }}>
@@ -498,6 +501,7 @@ function Dashboard({ session }) {
                 {showSupplementsFaq && (
                   <SupplementsFaqModal onClose={() => setShowSupplementsFaq(false)} />
                 )}
+                {showOrderSearch && <OrderSearchModal session={session} onClose={() => setShowOrderSearch(false)} />}
                 {showStripeDashboard && (
                   <div className="stripe-dashboard-overlay" role="dialog" aria-modal="true" aria-labelledby="stripe-dashboard-title">
                     <section className="stripe-dashboard-panel">

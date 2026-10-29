@@ -518,3 +518,10 @@
     border-right-color: var(--border);
   }
 }
+
+.order-search-toolbar { grid-template-columns: minmax(0, 1fr) auto; }
+.order-search-status { text-transform: capitalize; }
+.sidebar { overflow-y: auto; }
+@media (max-width: 640px) {
+  .order-search-toolbar { grid-template-columns: 1fr; }
+}

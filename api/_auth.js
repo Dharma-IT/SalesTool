@@ -6,7 +6,7 @@ export async function requireAuthenticatedUser(req) {
   const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
 
   if (!token) {
-    const error = new Error('You must be signed in to view Stripe payments.');
+    const error = new Error('You must be signed in to view this data.');
     error.statusCode = 401;
     throw error;
   }

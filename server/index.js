@@ -4,6 +4,7 @@ import Stripe from 'stripe';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { searchShopifyOrders } from '../api/_shopify-orders.js';
 import { getShopifyPriceSync } from '../api/_shopify-prices.js';
 import { getSucceededStripePayments } from '../api/_stripe-payments.js';
 import { requireAuthenticatedUser } from '../api/_auth.js';
@@ -33,7 +34,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     stripeConfigured: !!stripeKey,
-    shopifyConfigured: !!(process.env.SHOPIFY_STORE_DOMAIN && process.env.SHOPIFY_ADMIN_ACCESS_TOKEN)
+    shopifyConfigured: !!(process.env.SHOPIFY_STORE_DOMAIN && (process.env.SHOPIFY_ADMIN_ACCESS_TOKEN || (process.env.SHOPIFY_CLIENT_ID && process.env.SHOPIFY_CLIENT_SECRET)))
   });
 });
 
@@ -46,6 +47,16 @@ app.get('/api/shopify-prices', async (req, res) => {
   } catch (error) {
     console.error('Shopify price sync error:', error.message);
     res.status(502).json({ error: error.message });
+  }
+});
+
+app.get('/api/shopify-orders', async (req, res) => {
+  res.set('Cache-Control', 'private, no-store');
+  try {
+    await requireAuthenticatedUser(req);
+    res.json(await searchShopifyOrders(req.query.q, req.query.after));
+  } catch (error) {
+    res.status(error.statusCode || 502).json({ error: error.message });
   }
 });
 
