@@ -11,7 +11,6 @@ export default function OrderSearchModal({ session, onClose }) {
   const [pageInfo, setPageInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [customerDetailsAvailable, setCustomerDetailsAvailable] = useState(true);
   const panel = useRef(null);
   const controller = useRef(null);
 
@@ -58,7 +57,6 @@ export default function OrderSearchModal({ session, onClose }) {
       if (!response.ok) throw new Error(data.error || 'Unable to search orders.');
       setOrders(previous => after ? [...previous, ...data.orders] : data.orders);
       setPageInfo(data.pageInfo);
-      setCustomerDetailsAvailable(data.customerDetailsAvailable !== false);
     } catch (err) {
       if (err.name !== 'AbortError') setError(err.message);
     } finally {
@@ -81,12 +79,11 @@ export default function OrderSearchModal({ session, onClose }) {
             <button type="submit" className="stripe-fetch-button" disabled={loading || !query.trim()}><Search size={18} />{loading ? 'Searching…' : 'Search orders'}</button>
           </form>
           {error && <div className="stripe-fetch-error" role="alert">{error}</div>}
-          {!customerDetailsAvailable && <p role="status">Customer names are unavailable because the Shopify app lacks read_customers permission. Order details are shown below.</p>}
           <div className="stripe-results-meta" aria-live="polite"><div><h3>Shopify orders</h3><p>{searched ? `Results for “${searched}”` : 'Search for an order to view its details.'}</p></div><span className="stripe-result-count">{orders.length} {orders.length === 1 ? 'order' : 'orders'}</span></div>
           <div className="stripe-table-wrap" aria-busy={loading}>
-            <table className="stripe-payments-table"><thead><tr><th>Order</th><th>Customer</th><th>Date</th><th>Total</th><th>Payment</th><th>Fulfillment</th></tr></thead>
+            <table className="stripe-payments-table"><thead><tr><th>Order</th><th>Customer email</th><th>Date</th><th>Total</th><th>Payment</th><th>Fulfillment</th></tr></thead>
               <tbody>{orders.map(order => <tr key={order.id}>
-                <td><strong>{order.name}</strong></td><td>{order.customer?.displayName || (customerDetailsAvailable ? 'Guest' : 'Name unavailable')}<br /><small>{order.email || 'No email available'}</small></td>
+                <td><strong>{order.name}</strong></td><td>{order.email || 'No email available'}</td>
                 <td>{new Date(order.createdAt).toLocaleDateString()}</td>
                 <td className="stripe-payment-amount">{new Intl.NumberFormat(undefined, { style: 'currency', currency: order.totalPriceSet.shopMoney.currencyCode }).format(Number(order.totalPriceSet.shopMoney.amount))}</td>
                 <td className="order-search-status">{statusLabel(order.displayFinancialStatus)}</td><td className="order-search-status">{statusLabel(order.displayFulfillmentStatus)}</td>
