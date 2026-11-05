@@ -1,3 +1,5 @@
+import { isPaymentsOnlyUser } from '../shared/access.js';
+
 /* global process */
 
 export async function requireAuthenticatedUser(req) {
@@ -25,4 +27,14 @@ export async function requireAuthenticatedUser(req) {
     throw error;
   }
   return response.json();
+}
+
+export async function requireSalesUser(req) {
+  const user = await requireAuthenticatedUser(req);
+  if (isPaymentsOnlyUser(user)) {
+    const error = new Error('This account can only access Stripe payments.');
+    error.statusCode = 403;
+    throw error;
+  }
+  return user;
 }

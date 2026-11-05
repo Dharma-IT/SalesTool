@@ -1,3 +1,4 @@
+import { supabase } from '../utils/supabaseClient';
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, CreditCard, Leaf, Pill, Link, Check, Copy, Package, ShoppingCart, ExternalLink, ChevronDown, ChevronUp, Loader, Clock } from 'lucide-react';
 import {
@@ -341,9 +342,10 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
       setPayLaterError(null);
       setPayLaterLink(null);
       try {
+        const { data: { session } } = await supabase.auth.getSession();
         const response = await fetch('/api/create-payment-link', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` },
           body: JSON.stringify({
             products: selectedProducts.map(p => ({
               ...p,
@@ -378,9 +380,10 @@ const OrderReview = ({ selectedProducts, selectedState, bmi, onBack }) => {
       }
 
       const createLink = async (extraBody = {}) => {
+        const { data: { session } } = await supabase.auth.getSession();
         const response = await fetch('/api/create-payment-link', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` },
           body: JSON.stringify({ products: selectedProducts, paymentType, totalWithFee, feeAmount, ...extraBody })
         });
         const responseText = await response.text();

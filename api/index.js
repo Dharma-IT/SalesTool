@@ -7,7 +7,7 @@ import { dirname, resolve } from 'path';
 import { searchShopifyOrders } from './_shopify-orders.js';
 import { getShopifyPriceSync } from './_shopify-prices.js';
 import { getSucceededStripePayments } from './_stripe-payments.js';
-import { requireAuthenticatedUser } from './_auth.js';
+import { requireAuthenticatedUser, requireSalesUser } from './_auth.js';
 
 // Load .env only in local development
 // Note: In Vercel, use Environment Variables in the dashboard instead
@@ -55,7 +55,7 @@ app.get('/api/shopify-prices', async (req, res) => {
 app.get('/api/shopify-orders', async (req, res) => {
   res.set('Cache-Control', 'private, no-store');
   try {
-    await requireAuthenticatedUser(req);
+    await requireSalesUser(req);
     res.json(await searchShopifyOrders(req.query.q, req.query.after));
   } catch (error) {
     res.status(error.statusCode || 502).json({ error: error.message });
@@ -151,6 +151,15 @@ app.get('/api/sheet-links', async (req, res) => {
 
 
 // Create Stripe Payment Link endpoint
+app.post('/api/create-payment-link', async (req, res, next) => {
+  try {
+    await requireSalesUser(req);
+    next();
+  } catch (error) {
+    res.status(error.statusCode || 502).json({ error: error.message });
+  }
+});
+
 app.post('/api/create-payment-link', async (req, res) => {
   try {
     if (!stripe) {

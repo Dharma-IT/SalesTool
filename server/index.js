@@ -7,7 +7,7 @@ import { dirname, resolve } from 'path';
 import { searchShopifyOrders } from '../api/_shopify-orders.js';
 import { getShopifyPriceSync } from '../api/_shopify-prices.js';
 import { getSucceededStripePayments } from '../api/_stripe-payments.js';
-import { requireAuthenticatedUser } from '../api/_auth.js';
+import { requireAuthenticatedUser, requireSalesUser } from '../api/_auth.js';
 
 // Load .env.local explicitly (dotenv only loads .env by default)
 const __filename = fileURLToPath(import.meta.url);
@@ -53,7 +53,7 @@ app.get('/api/shopify-prices', async (req, res) => {
 app.get('/api/shopify-orders', async (req, res) => {
   res.set('Cache-Control', 'private, no-store');
   try {
-    await requireAuthenticatedUser(req);
+    await requireSalesUser(req);
     res.json(await searchShopifyOrders(req.query.q, req.query.after));
   } catch (error) {
     res.status(error.statusCode || 502).json({ error: error.message });
@@ -68,6 +68,15 @@ app.get('/api/stripe-payments', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('Stripe payment fetch error:', error.message);
+    res.status(error.statusCode || 502).json({ error: error.message });
+  }
+});
+
+app.post('/api/create-payment-link', async (req, res, next) => {
+  try {
+    await requireSalesUser(req);
+    next();
+  } catch (error) {
     res.status(error.statusCode || 502).json({ error: error.message });
   }
 });
